@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CardSwap</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+.phone { width:390px; height:844px; background:#f7f7f7; border-radius:40px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.28); display:flex; flex-direction:column; }
+
+/* STATUS BAR */
+.status-bar { display:flex; justify-content:space-between; align-items:center; padding:14px 24px 8px; background:#f7f7f7; flex-shrink:0; }
+.status-bar .time { font-size:15px; font-weight:600; }
+.status-icons { display:flex; align-items:center; gap:6px; }
+
+/* PAGES */
+.pages-wrapper { flex:1; overflow:hidden; position:relative; }
+.page { position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; opacity:0; pointer-events:none; transform:translateX(18px); transition:opacity .22s ease,transform .22s ease; scrollbar-width:none; }
+.page::-webkit-scrollbar { display:none; }
+.page.active { opacity:1; pointer-events:all; transform:translateX(0); }
+.page.slide-left { transform:translateX(-18px); }
+
+/* BOTTOM NAV */
+.bottom-nav { display:flex; background:white; border-top:1px solid #eee; padding:10px 0 20px; flex-shrink:0; z-index:10; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:4px; }
+.nav-icon { width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background .2s; }
+.nav-item.active .nav-icon { background:#111; }
+.nav-item.active .nav-icon svg { stroke:white !important; }
+.nav-label { font-size:10px; color:#aaa; font-weight:500; }
+.nav-item.active .nav-label { color:#111; font-weight:700; }
+
+/* SHARED */
+.page-header { display:flex; justify-content:space-between; align-items:center; padding:8px 20px 16px; background:#f7f7f7; }
+.user-info { display:flex; align-items:center; gap:10px; }
+.avatar { width:42px; height:42px; background:#333; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:16px; }
+.welcome-text { font-size:10px; color:#888; font-weight:500; text-transform:uppercase; letter-spacing:.5px; }
+.user-name { font-size:15px; font-weight:700; color:#111; }
+.header-icons { display:flex; gap:10px; }
+.icon-btn { width:38px; height:38px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid #eee; cursor:pointer; }
+.sub-header { display:flex; align-items:center; gap:12px; padding:10px 20px 16px; background:#f7f7f7; flex-shrink:0; }
+.back-btn { width:36px; height:36px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid #eee; cursor:pointer; flex-shrink:0; }
+.sub-header h3 { font-size:17px; font-weight:700; color:#111; }
+.page-title-header { padding:8px 20px 16px; }
+.page-title-header h2 { font-size:22px; font-weight:700; color:#111; }
+.page-title-header p { font-size:13px; color:#888; margin-top:2px; }
+
+/* HOME */
+.wallet-card { margin:0 16px; background:#111; border-radius:20px; padding:20px; color:white; position:relative; overflow:hidden; }
+.wallet-card::before { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; background:radial-gradient(circle,rgba(0,200,100,.15) 0%,transparent 70%); border-radius:50%; pointer-events:none; }
+.wallet-label { display:flex; align-items:center; justify-content:center; gap:6px; background:rgba(255,255,255,.1); border-radius:20px; padding:5px 14px; width:fit-content; margin:0 auto 16px; font-size:12px; color:#ccc; font-weight:500; }
+.balance { font-size:32px; font-weight:700; text-align:center; margin-bottom:20px; letter-spacing:2px; }
+.card-actions { display:flex; gap:10px; }
+.btn-sell { flex:1; background:white; color:#111; border:none; border-radius:10px; padding:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+.btn-withdraw { flex:1; background:rgba(255,255,255,.1); color:white; border:1px solid rgba(255,255,255,.15); border-radius:10px; padding:12px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+.card-footer { margin-top:14px; display:flex; align-items:center; justify-content:space-between; }
+.sold-label { display:flex; align-items:center; gap:6px; font-size:12px; color:#aaa; }
+.sold-amount { color:#00e676; font-size:13px; font-weight:600; }
+.dots { display:flex; justify-content:center; gap:6px; margin:14px 0; }
+.kyc-banner { margin:0 16px 16px; background:white; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; }
+.kyc-icon { width:36px; height:36px; background:#e8f5e9; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.kyc-text { flex:1; }
+.kyc-text h4 { font-size:13px; font-weight:700; color:#111; }
+.kyc-text p { font-size:11px; color:#888; margin-top:1px; }
+.upgrade-btn { color:#00b140; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.tabs { margin:0 16px 16px; background:#ebebeb; border-radius:12px; padding:4px; display:flex; }
+.tab { flex:1; text-align:center; padding:10px; font-size:13px; font-weight:600; border-radius:9px; cursor:pointer; color:#888; transition:all .2s; }
+.tab.active { background:#111; color:white; }
+.card-list { padding:0 16px; }
+.card-item { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid #eee; }
+.card-item:last-child { border-bottom:none; }
+.card-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.card-icon.apple { background:#f5f5f5; } .card-icon.amazon { background:#fff8e1; } .card-icon.google { background:#f3e5f5; } .card-icon.steam { background:#e3f2fd; } .card-icon.visa { background:#e8eaf6; } .card-icon.razer { background:#e8f5e9; }
+.card-info { flex:1; }
+.card-name { font-size:14px; font-weight:700; color:#111; }
+.card-type { font-size:11px; color:#aaa; margin-top:2px; }
+.card-rate { text-align:right; }
+.rate-value { font-size:14px; font-weight:700; color:#111; }
+.rate-trend { font-size:11px; margin-top:2px; display:flex; align-items:center; justify-content:flex-end; gap:3px; }
+.rate-trend.hot { color:#e53935; } .rate-trend.low { color:#f57c00; } .rate-trend.stable { color:#888; }
+.tx-list { padding:0 16px; }
+.tx-item { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid #eee; }
+.tx-item:last-child { border-bottom:none; }
+.tx-info { flex:1; }
+.tx-name { font-size:14px; font-weight:700; color:#111; }
+.tx-date { font-size:11px; color:#aaa; margin-top:2px; }
+.tx-amount { text-align:right; }
+.tx-amount .amt { font-size:14px; font-weight:700; }
+.tx-amount .amt.credit { color:#00b140; } .tx-amount .amt.debit { color:#e53935; }
+.tx-amount .status { font-size:10px; color:#aaa; margin-top:2px; }
+
+/* SELL LIST PAGE */
+.sell-search { margin:0 16px 16px; background:white; border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:10px; border:1px solid #eee; }
+.sell-search input { flex:1; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:14px; color:#111; background:transparent; }
+.sell-search input::placeholder { color:#bbb; }
+.filter-row { display:flex; gap:8px; padding:0 16px 16px; overflow-x:auto; scrollbar-width:none; }
+.filter-row::-webkit-scrollbar { display:none; }
+.filter-chip { padding:7px 16px; border-radius:20px; font-size:12px; font-weight:600; white-space:nowrap; cursor:pointer; transition:all .2s; border:1.5px solid #e0e0e0; color:#666; background:white; }
+.filter-chip.active { background:#111; color:white; border-color:#111; }
+.section-label { padding:0 16px 10px; font-size:12px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; }
+.sell-card-item { margin:0 16px 10px; background:white; border-radius:14px; padding:14px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:box-shadow .15s; }
+.sell-card-item:active { box-shadow:0 4px 20px rgba(0,0,0,.1); }
+.sell-card-body { flex:1; }
+.sell-card-name { font-size:14px; font-weight:700; color:#111; }
+.sell-card-sub { font-size:11px; color:#aaa; margin-top:2px; }
+.sell-card-rate { font-size:13px; font-weight:700; color:#00b140; margin-top:3px; }
+.sell-btn-sm { background:#111; color:white; border:none; border-radius:8px; padding:8px 14px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+
+/* ═══ SELL FLOW ═══ */
+
+/* Step indicator */
+.step-indicator { display:flex; align-items:center; justify-content:center; gap:0; padding:0 24px 20px; }
+.step-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:#eee; color:#aaa; flex-shrink:0; transition:all .3s; }
+.step-dot.done { background:#111; color:white; }
+.step-dot.active { background:#111; color:white; box-shadow:0 0 0 4px rgba(0,0,0,.12); }
+.step-line { flex:1; height:2px; background:#eee; transition:background .3s; }
+.step-line.done { background:#111; }
+
+/* ── STEP 1: Upload ── */
+.upload-card-hero { margin:0 16px; background:#111; border-radius:20px; padding:18px; display:flex; align-items:center; gap:14px; color:white; }
+.upload-card-hero .card-icon-lg { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.upload-card-hero .card-icon-lg.apple { background:#f5f5f5; } .upload-card-hero .card-icon-lg.amazon { background:#fff8e1; } .upload-card-hero .card-icon-lg.google { background:#f3e5f5; } .upload-card-hero .card-icon-lg.steam { background:#e3f2fd; } .upload-card-hero .card-icon-lg.visa { background:#e8eaf6; } .upload-card-hero .card-icon-lg.razer { background:#e8f5e9; }
+.upload-card-hero .card-hero-info h3 { font-size:17px; font-weight:700; }
+.upload-card-hero .card-hero-info p { font-size:12px; color:#aaa; margin-top:2px; }
+.upload-card-hero .card-hero-rate { margin-left:auto; text-align:right; }
+.upload-card-hero .card-hero-rate span { font-size:12px; color:#aaa; display:block; }
+.upload-card-hero .card-hero-rate strong { font-size:16px; color:#00e676; }
+.upload-zone { margin:16px; background:white; border-radius:16px; border:2.5px dashed #d0d0d0; padding:32px 20px; display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; transition:border-color .2s,background .2s; position:relative; overflow:hidden; }
+.upload-zone:hover { border-color:#111; background:#fafafa; }
+.upload-zone.has-image { border-style:solid; border-color:#00b140; padding:0; min-height:180px; }
+.upload-zone .upload-icon { width:56px; height:56px; background:#f0f0f0; border-radius:16px; display:flex; align-items:center; justify-content:center; }
+.upload-zone h4 { font-size:14px; font-weight:700; color:#111; }
+.upload-zone p { font-size:12px; color:#aaa; text-align:center; }
+.upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.upload-preview { width:100%; height:180px; object-fit:cover; border-radius:13px; display:block; }
+.upload-change-btn { position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,.65); color:white; border:none; border-radius:8px; padding:6px 12px; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:700; cursor:pointer; }
+.upload-tips { margin:0 16px 16px; }
+.upload-tips h5 { font-size:12px; font-weight:700; color:#111; margin-bottom:8px; }
+.tip-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:6px; }
+.tip-dot { width:6px; height:6px; border-radius:50%; background:#00b140; margin-top:5px; flex-shrink:0; }
+.tip-row p { font-size:12px; color:#666; }
+.flow-next-btn { margin:0 16px 20px; background:#111; color:white; border:none; border-radius:14px; padding:16px; width:calc(100% - 32px); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:opacity .2s; }
+.flow-next-btn:disabled { opacity:.35; cursor:default; }
+
+/* ── STEP 2: Denomination ── */
+.denom-card-hero { margin:0 16px 20px; background:#111; border-radius:20px; padding:18px; display:flex; align-items:center; gap:14px; color:white; }
+.denom-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:0 16px 20px; }
+.denom-chip { background:white; border:2px solid #e0e0e0; border-radius:12px; padding:14px 8px; text-align:center; cursor:pointer; transition:all .2s; }
+.denom-chip:hover { border-color:#aaa; }
+.denom-chip.selected { border-color:#111; background:#111; }
+.denom-chip .denom-val { font-size:16px; font-weight:700; color:#111; }
+.denom-chip.selected .denom-val { color:white; }
+.denom-chip .denom-payout { font-size:10px; color:#aaa; margin-top:3px; }
+.denom-chip.selected .denom-payout { color:rgba(255,255,255,.6); }
+.denom-divider { display:flex; align-items:center; gap:12px; padding:0 16px 20px; }
+.denom-divider span { font-size:12px; color:#aaa; font-weight:600; white-space:nowrap; }
+.denom-divider::before,.denom-divider::after { content:''; flex:1; height:1px; background:#e0e0e0; }
+.custom-amount-wrap { margin:0 16px 20px; background:white; border-radius:14px; padding:16px; border:2px solid #eee; transition:border-color .2s; }
+.custom-amount-wrap:focus-within { border-color:#111; }
+.custom-label { font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+.custom-input-row { display:flex; align-items:center; gap:10px; }
+.dollar-sign { font-size:22px; font-weight:700; color:#111; }
+.custom-amount-input { flex:1; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:28px; font-weight:700; color:#111; background:transparent; width:100%; }
+.custom-amount-input::placeholder { color:#ddd; }
+.denom-payout-preview { margin:0 16px 20px; background:white; border-radius:14px; padding:16px; }
+.payout-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f5f5f5; }
+.payout-row:last-child { border-bottom:none; padding-top:12px; margin-top:4px; }
+.payout-label { font-size:13px; color:#888; }
+.payout-value { font-size:13px; font-weight:700; color:#111; }
+.payout-total-label { font-size:14px; font-weight:700; color:#111; }
+.payout-total-value { font-size:18px; font-weight:700; color:#00b140; }
+
+/* ── SUCCESS PAGE ── */
+.success-page { display:flex; flex-direction:column; align-items:center; padding:0 24px 24px; }
+.success-lottie { width:120px; height:120px; background:#e8f5e9; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:30px auto 24px; animation:popIn .5s cubic-bezier(.175,.885,.32,1.4) both; }
+@keyframes popIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+.success-checkmark { animation:drawCheck .4s .2s ease both; }
+@keyframes drawCheck { from { stroke-dashoffset:60; } to { stroke-dashoffset:0; } }
+.success-title { font-size:24px; font-weight:700; color:#111; text-align:center; margin-bottom:8px; }
+.success-sub { font-size:14px; color:#888; text-align:center; line-height:1.5; margin-bottom:28px; }
+.success-card { background:white; border-radius:20px; width:100%; padding:20px; margin-bottom:20px; }
+.success-card-header { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid #f0f0f0; margin-bottom:16px; }
+.success-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; }
+.success-row-label { font-size:13px; color:#888; }
+.success-row-value { font-size:13px; font-weight:700; color:#111; }
+.success-amount { font-size:28px; font-weight:700; color:#00b140; text-align:center; margin-bottom:6px; }
+.success-ref { font-size:12px; color:#aaa; text-align:center; margin-bottom:24px; }
+.confetti-dot { position:absolute; border-radius:50%; animation:confettiFall linear forwards; }
+@keyframes confettiFall { to { transform:translateY(120px) rotate(360deg); opacity:0; } }
+.success-actions { display:flex; gap:10px; width:100%; margin-top:4px; }
+.btn-home { flex:1; background:white; color:#111; border:2px solid #e0e0e0; border-radius:14px; padding:14px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+.btn-sell-another { flex:1; background:#111; color:white; border:none; border-radius:14px; padding:14px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+
+/* RATES */
+.rates-summary { margin:0 16px 16px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.rates-stat { background:white; border-radius:14px; padding:14px; }
+.rates-stat .stat-label { font-size:11px; color:#888; font-weight:500; }
+.rates-stat .stat-value { font-size:18px; font-weight:700; color:#111; margin-top:4px; }
+.rates-stat .stat-change { font-size:11px; margin-top:2px; }
+.rates-stat .stat-change.up { color:#00b140; }
+.rates-stat .stat-change.dn { color:#e53935; }
+.rate-search { margin:0 16px 12px; background:white; border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:10px; border:1px solid #eee; }
+.rate-search input { flex:1; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:14px; color:#111; background:transparent; }
+.rate-search input::placeholder { color:#bbb; }
+.rate-card-item { display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid #eee; }
+.rate-card-item:last-child { border-bottom:none; }
+.rate-info { flex:1; }
+.rate-name { font-size:14px; font-weight:700; color:#111; }
+.rate-sub { font-size:11px; color:#aaa; margin-top:2px; }
+.rate-right { text-align:right; }
+.rate-val { font-size:14px; font-weight:700; color:#111; }
+.rate-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:3px; }
+.rate-badge.hot { background:#fce4ec; color:#e53935; }
+.rate-badge.low { background:#fff3e0; color:#f57c00; }
+.rate-badge.stable { background:#f5f5f5; color:#888; }
+
+/* SETTINGS */
+.profile-card { margin:0 16px 20px; background:#111; border-radius:20px; padding:20px; color:white; display:flex; align-items:center; gap:14px; }
+.profile-avatar { width:56px; height:56px; background:#444; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; color:white; border:2px solid rgba(255,255,255,.2); }
+.profile-info { flex:1; }
+.profile-name { font-size:17px; font-weight:700; }
+.profile-email { font-size:12px; color:#aaa; margin-top:2px; }
+.profile-badge { background:rgba(0,177,64,.2); color:#00e676; border-radius:20px; padding:4px 12px; font-size:11px; font-weight:700; }
+.settings-section { margin:0 16px 20px; }
+.settings-section-title { font-size:11px; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+.settings-group { background:white; border-radius:14px; overflow:hidden; }
+.settings-item { display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid #f5f5f5; cursor:pointer; }
+.settings-item:last-child { border-bottom:none; }
+.settings-item-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.settings-item-label { flex:1; font-size:14px; font-weight:600; color:#111; }
+.settings-item-value { font-size:12px; color:#aaa; }
+.stoggle { width:38px; height:22px; background:#00b140; border-radius:11px; position:relative; cursor:pointer; transition:background .2s; flex-shrink:0; }
+.stoggle::after { content:''; position:absolute; top:3px; right:3px; width:16px; height:16px; background:white; border-radius:50%; transition:all .2s; }
+.stoggle.off { background:#ddd; }
+.stoggle.off::after { right:auto; left:3px; }
+.logout-btn { margin:0 16px 24px; background:#fce4ec; color:#e53935; border:none; border-radius:14px; padding:16px; width:calc(100% - 32px); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+
+/* ═══ WITHDRAWAL FLOW ═══ */
+.wd-balance-card { margin:0 16px 20px; background:#111; border-radius:20px; padding:22px; color:white; position:relative; overflow:hidden; }
+.wd-balance-card::before { content:''; position:absolute; top:-50px; left:-50px; width:180px; height:180px; background:radial-gradient(circle,rgba(0,200,100,.18) 0%,transparent 70%); border-radius:50%; pointer-events:none; }
+.wd-bal-label { font-size:11px; color:#aaa; font-weight:500; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.wd-bal-amount { font-size:34px; font-weight:700; margin-bottom:4px; }
+.wd-bal-hint { font-size:11px; color:#aaa; }
+.wd-amount-wrap { margin:0 16px 16px; background:white; border-radius:16px; padding:18px; border:2px solid #eee; transition:border-color .2s; }
+.wd-amount-wrap:focus-within { border-color:#111; }
+.wd-amount-label { font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; }
+.wd-amount-row { display:flex; align-items:center; gap:10px; }
+.wd-currency { font-size:24px; font-weight:700; color:#ccc; }
+.wd-amount-input { flex:1; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:34px; font-weight:700; color:#111; background:transparent; width:100%; }
+.wd-amount-input::placeholder { color:#ddd; }
+.wd-quick-row { display:flex; gap:8px; margin:0 16px 20px; }
+.wd-quick-chip { flex:1; background:white; border:1.5px solid #e0e0e0; border-radius:10px; padding:10px 4px; text-align:center; font-size:13px; font-weight:700; color:#111; cursor:pointer; transition:all .2s; }
+.wd-quick-chip:hover { border-color:#111; }
+.wd-quick-chip.sel { background:#111; color:white; border-color:#111; }
+.wd-section-title { padding:0 16px 10px; font-size:12px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; }
+.wd-bank-list { padding:0 16px; display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.wd-bank-item { background:white; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:14px; cursor:pointer; border:2px solid transparent; transition:all .2s; }
+.wd-bank-item.selected { border-color:#111; background:#fafafa; }
+.wd-bank-logo { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; flex-shrink:0; }
+.wd-bank-info { flex:1; }
+.wd-bank-name { font-size:14px; font-weight:700; color:#111; }
+.wd-bank-acct { font-size:11px; color:#aaa; margin-top:2px; }
+.wd-bank-radio { width:20px; height:20px; border-radius:50%; border:2px solid #ddd; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; }
+.wd-bank-item.selected .wd-bank-radio { border-color:#111; background:#111; }
+.wd-bank-item.selected .wd-bank-radio::after { content:''; width:8px; height:8px; background:white; border-radius:50%; display:block; }
+.wd-add-bank { margin:0 16px 16px; background:white; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; border:2px dashed #e0e0e0; }
+.wd-add-bank-icon { width:44px; height:44px; border-radius:12px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.wd-add-bank span { font-size:14px; font-weight:600; color:#888; }
+.wd-fee-box { margin:0 16px 8px; background:white; border-radius:14px; padding:16px; }
+.wd-fee-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #f5f5f5; }
+.wd-fee-row:last-child { border-bottom:none; padding-top:12px; margin-top:4px; }
+.wd-fee-label { font-size:13px; color:#888; }
+.wd-fee-value { font-size:13px; font-weight:700; color:#111; }
+.wd-fee-total-label { font-size:14px; font-weight:700; color:#111; }
+.wd-fee-total-value { font-size:18px; font-weight:700; color:#111; }
+/* Confirm */
+.wd-confirm-hero { margin:0 16px 20px; background:#111; border-radius:20px; padding:28px 24px; color:white; text-align:center; position:relative; overflow:hidden; }
+.wd-confirm-hero::before { content:''; position:absolute; top:-40px; right:-40px; width:160px; height:160px; background:radial-gradient(circle,rgba(0,200,100,.15) 0%,transparent 70%); border-radius:50%; }
+.wd-confirm-hero .hero-label { font-size:12px; color:#aaa; margin-bottom:8px; }
+.wd-confirm-hero .hero-amount { font-size:44px; font-weight:700; margin-bottom:4px; }
+.wd-confirm-hero .hero-sub { font-size:12px; color:#aaa; }
+.wd-confirm-details { margin:0 16px 16px; background:white; border-radius:16px; overflow:hidden; }
+.wd-confirm-row { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid #f5f5f5; }
+.wd-confirm-row:last-child { border-bottom:none; }
+.wd-confirm-label { font-size:13px; color:#888; }
+.wd-confirm-value { font-size:13px; font-weight:700; color:#111; text-align:right; max-width:55%; }
+.wd-confirm-bank { display:flex; align-items:center; gap:8px; }
+.wd-confirm-bank-logo { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; }
+/* PIN pad */
+.wd-pin-section { margin:0 16px 20px; }
+.wd-pin-label { font-size:12px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; text-align:center; }
+.wd-pin-dots { display:flex; gap:14px; justify-content:center; margin-bottom:24px; }
+.wd-pin-dot { width:16px; height:16px; border-radius:50%; border:2px solid #ddd; transition:all .2s; }
+.wd-pin-dot.filled { background:#111; border-color:#111; transform:scale(1.1); }
+.wd-numpad { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.wd-num-btn { background:white; border:none; border-radius:14px; padding:18px; font-family:'DM Sans',sans-serif; font-size:22px; font-weight:600; color:#111; cursor:pointer; transition:all .12s; display:flex; align-items:center; justify-content:center; }
+.wd-num-btn:active { background:#111; color:white; transform:scale(.94); }
+.wd-num-btn.empty { background:transparent; cursor:default; pointer-events:none; }
+.wd-num-btn.del { background:#f0f0f0; font-size:16px; }
+/* Success */
+.wd-success-page { display:flex; flex-direction:column; align-items:center; padding:20px 24px 30px; }
+.wd-success-anim { width:110px; height:110px; background:#e8f5e9; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:10px auto 20px; animation:popIn .5s cubic-bezier(.175,.885,.32,1.4) both; }
+.wd-receipt { background:white; border-radius:20px; width:100%; padding:20px; margin-bottom:16px; position:relative; }
+.wd-receipt::before { content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%); width:16px; height:16px; background:#e0e0e0; border-radius:50%; }
+.wd-receipt::after { content:''; position:absolute; right:-8px; top:50%; transform:translateY(-50%); width:16px; height:16px; background:#e0e0e0; border-radius:50%; }
+.wd-receipt-dashed { border:none; border-top:2px dashed #eee; margin:14px 0; }
+.wd-receipt-amount { font-size:32px; font-weight:700; color:#111; text-align:center; margin-bottom:4px; }
+.wd-receipt-sub { font-size:12px; color:#aaa; text-align:center; margin-bottom:16px; }
+.wd-receipt-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; }
+.wd-receipt-label { font-size:12px; color:#aaa; }
+.wd-receipt-value { font-size:12px; font-weight:700; color:#111; }
+.wd-timeline { width:100%; background:white; border-radius:16px; padding:16px; margin-bottom:20px; }
+.wd-timeline-item { display:flex; gap:14px; margin-bottom:16px; }
+.wd-timeline-item:last-child { margin-bottom:0; }
+.wd-tl-left { display:flex; flex-direction:column; align-items:center; }
+.wd-tl-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.wd-tl-line { width:2px; flex:1; min-height:18px; background:#eee; margin-top:4px; }
+.wd-tl-content { flex:1; padding-top:4px; }
+.wd-tl-title { font-size:13px; font-weight:700; color:#111; }
+.wd-tl-time { font-size:11px; color:#aaa; margin-top:2px; }
+
+/* ═══ TRANSACTION RECEIPT PAGE ═══ */
+.tx-item { cursor: pointer; transition: background .15s; border-radius: 12px; padding: 12px 0; }
+.tx-item:hover { background: rgba(0,0,0,.02); }
+.tx-item .chevron { margin-left: auto; color: #ccc; flex-shrink: 0; }
+
+/* Receipt page */
+.rcpt-hero { margin: 0 16px 20px; border-radius: 20px; padding: 28px 20px 24px; text-align: center; color: white; position: relative; overflow: hidden; }
+.rcpt-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; background: radial-gradient(circle, rgba(255,255,255,.12) 0%, transparent 70%); border-radius: 50%; }
+.rcpt-hero .rcpt-type-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+.rcpt-hero .rcpt-amount { font-size: 36px; font-weight: 700; margin-bottom: 4px; }
+.rcpt-hero .rcpt-title { font-size: 14px; opacity: .75; margin-bottom: 10px; }
+.rcpt-status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.rcpt-status-pill.completed { background: rgba(0,230,118,.2); color: #00e676; }
+.rcpt-status-pill.pending   { background: rgba(255,160, 0,.2); color: #ffa000; }
+.rcpt-status-pill.failed    { background: rgba(229, 57,53,.2); color: #ef5350; }
+
+.rcpt-card { margin: 0 16px; background: white; border-radius: 20px; overflow: hidden; margin-bottom: 14px; }
+.rcpt-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f5f5f5; }
+.rcpt-row:last-child { border-bottom: none; }
+.rcpt-row-label { font-size: 13px; color: #888; }
+.rcpt-row-value { font-size: 13px; font-weight: 700; color: #111; text-align: right; max-width: 60%; }
+
+.rcpt-dashed-wrap { margin: 0 16px 14px; position: relative; }
+.rcpt-dashed-wrap::before { content: ''; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; background: #f7f7f7; border-radius: 50%; }
+.rcpt-dashed-wrap::after  { content: ''; position: absolute; right: -8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; background: #f7f7f7; border-radius: 50%; }
+.rcpt-dashed-line { border: none; border-top: 2px dashed #e0e0e0; }
+
+.rcpt-download-btn { margin: 0 16px 12px; background: #111; color: white; border: none; border-radius: 14px; padding: 16px; width: calc(100% - 32px); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.rcpt-share-btn { margin: 0 16px 24px; background: white; color: #111; border: 2px solid #e0e0e0; border-radius: 14px; padding: 14px; width: calc(100% - 32px); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+/* Download spinner */
+.rcpt-download-btn.loading { opacity: .7; pointer-events: none; }
+
+
+/* ═══ NOTIFICATIONS PAGE ═══ */
+.notif-filter-row { display:flex; gap:8px; padding:0 16px 16px; overflow-x:auto; scrollbar-width:none; }
+.notif-filter-row::-webkit-scrollbar { display:none; }
+.notif-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; }
+.notif-empty-icon { width:72px; height:72px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+.notif-empty p { font-size:13px; color:#aaa; text-align:center; }
+
+.notif-group-label { padding:0 16px 8px; font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; }
+.notif-item { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; border-bottom:1px solid #f0f0f0; cursor:pointer; transition:background .15s; position:relative; }
+.notif-item:hover { background:#fafafa; }
+.notif-item.unread { background:#fafffe; }
+.notif-item.unread::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:#00b140; border-radius:0 3px 3px 0; }
+.notif-icon { width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.notif-content { flex:1; min-width:0; }
+.notif-title { font-size:13px; font-weight:700; color:#111; }
+.notif-body  { font-size:12px; color:#777; margin-top:3px; line-height:1.45; }
+.notif-time  { font-size:10px; color:#bbb; margin-top:5px; }
+.notif-unread-dot { width:8px; height:8px; background:#00b140; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.notif-mark-all { padding:8px 16px 12px; font-size:13px; color:#00b140; font-weight:700; cursor:pointer; text-align:right; }
+
+/* ═══ SUPPORT PAGE ═══ */
+.support-hero { margin:0 16px 20px; background:#111; border-radius:20px; padding:24px 20px; color:white; text-align:center; position:relative; overflow:hidden; }
+.support-hero::before { content:''; position:absolute; top:-50px; right:-50px; width:160px; height:160px; background:radial-gradient(circle,rgba(0,200,100,.15) 0%,transparent 70%); border-radius:50%; }
+.support-hero h3 { font-size:18px; font-weight:700; margin-bottom:6px; }
+.support-hero p { font-size:12px; color:#aaa; line-height:1.5; }
+.support-status { display:inline-flex; align-items:center; gap:6px; background:rgba(0,230,118,.15); color:#00e676; border-radius:20px; padding:5px 14px; font-size:11px; font-weight:700; margin-top:12px; }
+.support-status-dot { width:6px; height:6px; background:#00e676; border-radius:50%; animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+.support-section { margin:0 16px 20px; }
+.support-section-title { font-size:12px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+.support-channels { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.support-channel { background:white; border-radius:16px; padding:18px 14px; text-align:center; cursor:pointer; transition:box-shadow .2s; border:2px solid transparent; }
+.support-channel:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); border-color:#eee; }
+.support-channel-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; }
+.support-channel-name { font-size:13px; font-weight:700; color:#111; }
+.support-channel-sub { font-size:11px; color:#aaa; margin-top:3px; }
+
+.support-faq-item { background:white; border-radius:14px; margin-bottom:10px; overflow:hidden; }
+.support-faq-q { display:flex; align-items:center; justify-content:space-between; padding:16px; cursor:pointer; }
+.support-faq-q span { font-size:13px; font-weight:600; color:#111; flex:1; padding-right:10px; line-height:1.4; }
+.support-faq-chevron { flex-shrink:0; transition:transform .25s; }
+.support-faq-chevron.open { transform:rotate(180deg); }
+.support-faq-a { font-size:12px; color:#666; line-height:1.6; padding:0 16px 16px; display:none; }
+.support-faq-a.open { display:block; }
+
+.support-chat-btn { margin:0 16px 12px; background:#111; color:white; border:none; border-radius:14px; padding:16px; width:calc(100% - 32px); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; }
+
+
+/* ═══ SETTINGS SUB-PAGES ═══ */
+.settings-form-wrap { margin:0 16px 16px; background:white; border-radius:16px; overflow:hidden; }
+.settings-form-row { padding:14px 16px; border-bottom:1px solid #f5f5f5; }
+.settings-form-row:last-child { border-bottom:none; }
+.settings-form-label { font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.settings-form-input { width:100%; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; color:#111; background:transparent; }
+.settings-form-input::placeholder { color:#ccc; font-weight:400; }
+.settings-form-static { font-size:14px; font-weight:600; color:#111; }
+.settings-form-static.muted { color:#aaa; }
+.settings-save-btn { margin:0 16px 12px; background:#111; color:white; border:none; border-radius:14px; padding:16px; width:calc(100%-32px); font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; width:calc(100% - 32px); }
+.settings-save-btn:active { opacity:.8; }
+.settings-info-box { margin:0 16px 16px; background:#f8f8f8; border-radius:14px; padding:14px 16px; display:flex; gap:12px; }
+.settings-info-box svg { flex-shrink:0; margin-top:1px; }
+.settings-info-box p { font-size:12px; color:#666; line-height:1.5; }
+
+/* Avatar editor */
+.avatar-edit-wrap { display:flex; flex-direction:column; align-items:center; padding:24px 16px 20px; }
+.avatar-lg { width:88px; height:88px; background:#222; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:32px; font-weight:700; position:relative; cursor:pointer; }
+.avatar-edit-badge { position:absolute; bottom:0; right:0; width:28px; height:28px; background:#111; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid white; }
+.avatar-name { font-size:16px; font-weight:700; color:#111; margin-top:12px; }
+.avatar-sub { font-size:12px; color:#aaa; margin-top:3px; }
+
+/* Bank accounts */
+.bank-card { margin:0 16px 12px; background:white; border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px; position:relative; }
+.bank-card-logo { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; flex-shrink:0; }
+.bank-card-info { flex:1; }
+.bank-card-name { font-size:14px; font-weight:700; color:#111; }
+.bank-card-acct { font-size:12px; color:#aaa; margin-top:2px; }
+.bank-card-type { font-size:10px; font-weight:700; background:#f0f0f0; color:#888; padding:2px 8px; border-radius:8px; display:inline-block; margin-top:5px; }
+.bank-card-default { font-size:10px; font-weight:700; background:#e8f5e9; color:#00b140; padding:2px 8px; border-radius:8px; display:inline-block; margin-top:5px; }
+.bank-card-menu { width:32px; height:32px; background:#f5f5f5; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+.add-bank-btn { margin:0 16px 20px; background:white; border:2px dashed #e0e0e0; border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer; }
+.add-bank-btn span { font-size:14px; font-weight:600; color:#888; }
+
+/* KYC */
+.kyc-steps { margin:0 16px 20px; }
+.kyc-step { display:flex; gap:14px; margin-bottom:8px; }
+.kyc-step-left { display:flex; flex-direction:column; align-items:center; }
+.kyc-step-num { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+.kyc-step-num.done { background:#00b140; color:white; }
+.kyc-step-num.active { background:#111; color:white; }
+.kyc-step-num.todo { background:#f0f0f0; color:#aaa; }
+.kyc-step-line { width:2px; flex:1; min-height:16px; background:#eee; margin-top:4px; }
+.kyc-step-content { flex:1; padding-top:6px; padding-bottom:16px; }
+.kyc-step-title { font-size:14px; font-weight:700; color:#111; }
+.kyc-step-sub { font-size:12px; color:#888; margin-top:3px; line-height:1.4; }
+.kyc-upload-box { margin:10px 0 0; background:#f8f8f8; border-radius:12px; border:2px dashed #e0e0e0; padding:20px; text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; }
+.kyc-upload-box p { font-size:12px; color:#aaa; }
+.kyc-tier-box { margin:0 16px 16px; background:#111; border-radius:16px; padding:18px; color:white; display:flex; align-items:center; gap:16px; }
+.kyc-tier-badge { width:52px; height:52px; border-radius:14px; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.kyc-tier-info h4 { font-size:15px; font-weight:700; }
+.kyc-tier-info p { font-size:12px; color:#aaa; margin-top:3px; }
+
+/* Language */
+.lang-item { display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid #f5f5f5; cursor:pointer; background:white; }
+.lang-item:last-child { border-bottom:none; }
+.lang-flag { font-size:24px; flex-shrink:0; }
+.lang-name { flex:1; font-size:14px; font-weight:600; color:#111; }
+.lang-check { color:#00b140; }
+
+/* Change PIN */
+.pin-step-title { padding:0 16px 6px; font-size:13px; color:#888; text-align:center; }
+.pin-step-dots { display:flex; gap:14px; justify-content:center; margin-bottom:28px; }
+.pin-step-dot { width:16px; height:16px; border-radius:50%; border:2px solid #ddd; transition:all .2s; }
+.pin-step-dot.filled { background:#111; border-color:#111; transform:scale(1.1); }
+.pin-step-dot.error { background:#e53935; border-color:#e53935; animation:shake .3s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+.pin-step-numpad { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:0 16px; }
+.pin-step-num { background:white; border:none; border-radius:14px; padding:18px; font-family:'DM Sans',sans-serif; font-size:22px; font-weight:600; color:#111; cursor:pointer; transition:all .12s; display:flex; align-items:center; justify-content:center; }
+.pin-step-num:active { background:#111; color:white; transform:scale(.94); }
+.pin-step-num.empty { background:transparent; cursor:default; pointer-events:none; }
+.pin-step-num.del { background:#f0f0f0; font-size:16px; }
+
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="time" id="clock">9:41</span>
+    <div class="status-icons">
+      <svg width="18" height="13" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="12" width="4" height="6" rx="1"/><rect x="5.5" y="8" width="4" height="10" rx="1"/><rect x="11" y="4" width="4" height="14" rx="1"/><rect x="16.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
+      <span style="font-size:12px;font-weight:700;">5G</span>
+      <svg width="26" height="13" viewBox="0 0 28 14" fill="none"><rect x=".5" y=".5" width="23" height="13" rx="2.5" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="2" width="19" height="10" rx="1.5" fill="currentColor"/><path d="M24.5 4.5v5a2 2 0 000-5z" fill="currentColor" opacity=".4"/></svg>
+    </div>
+  </div>
+
+  <div class="pages-wrapper">
+
+    <!-- ══ HOME ══ -->
+    <div class="page active" id="page-home">
+      <div class="page-header">
+        <div class="user-info">
+          <div class="avatar">J</div>
+          <div><div class="welcome-text">Welcome Back</div><div class="user-name">orjiace</div></div>
+        </div>
+        <div class="header-icons">
+          <div class="icon-btn" onclick="navigate('support')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
+          <div class="icon-btn" style="position:relative;" onclick="navigate('notifications')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span id="notif-badge" style="position:absolute;top:6px;right:6px;width:8px;height:8px;background:#00b140;border-radius:50%;border:2px solid white;"></span></div>
+        </div>
+      </div>
+      <div class="wallet-card">
+        <div class="wallet-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          Earnings Wallet
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </div>
+        <div class="balance"><span style="font-size:28px;margin-right:4px;">₦</span>&#42;&#42;&#42;&#42;&#42;&#42;&#42;&#42;</div>
+        <div class="card-actions">
+          <button class="btn-sell" onclick="navigate('sell')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Sell Card
+          </button>
+          <button class="btn-withdraw" onclick="openWithdraw()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>Withdraw
+          </button>
+        </div>
+        <div class="card-footer">
+          <div class="sold-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
+            5 cards sold this week
+          </div>
+          <div class="sold-amount">+ ₦ 78,500</div>
+        </div>
+      </div>
+      <div class="dots">
+        <div style="width:20px;height:5px;border-radius:3px;background:#333;"></div>
+        <div style="width:8px;height:5px;border-radius:3px;background:#ddd;"></div>
+      </div>
+      <div class="kyc-banner">
+        <div class="kyc-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="kyc-text"><h4>Verify to sell cards</h4><p>Complete KYC to unlock higher trade limits</p></div>
+        <div class="upgrade-btn">Upgrade</div>
+      </div>
+      <div class="tabs">
+        <div class="tab" id="tab-tx" onclick="switchTab('tx')">My Transactions</div>
+        <div class="tab active" id="tab-gr" onclick="switchTab('gr')">Gift Card Rates</div>
+      </div>
+      <div id="home-tx" style="display:none;">
+        <div class="tx-list" id="tx-list-container"></div>
+      </div>
+      <div id="home-gr">
+        <div class="card-list">
+          <div class="card-item"><div class="card-icon apple"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" alt="Apple" style="width:24px;height:24px;object-fit:contain;"></div><div class="card-info"><div class="card-name">iTunes / Apple</div><div class="card-type">USA Physical</div></div><div class="card-rate"><div class="rate-value">₦ 750/$</div><div class="rate-trend hot">▲ Hot</div></div></div>
+          <div class="card-item"><div class="card-icon amazon"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" style="width:36px;height:36px;object-fit:contain;"></div><div class="card-info"><div class="card-name">Amazon</div><div class="card-type">USA E-code</div></div><div class="card-rate"><div class="rate-value">₦ 680/$</div><div class="rate-trend hot">▲ Hot</div></div></div>
+          <div class="card-item"><div class="card-icon google"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style="width:40px;height:40px;object-fit:contain;"></div><div class="card-info"><div class="card-name">Google Play</div><div class="card-type">USA Physical</div></div><div class="card-rate"><div class="rate-value">₦ 620/$</div><div class="rate-trend low">▼ Low</div></div></div>
+          <div class="card-item"><div class="card-icon steam"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" alt="Steam" style="width:26px;height:26px;object-fit:contain;"></div><div class="card-info"><div class="card-name">Steam Wallet</div><div class="card-type">Global</div></div><div class="card-rate"><div class="rate-value">₦ 580/$</div><div class="rate-trend stable">— Stable</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SELL LIST ══ -->
+    <div class="page" id="page-sell">
+      <div class="page-title-header"><h2>Sell Gift Cards</h2><p>Choose a card type to get started</p></div>
+      <div class="sell-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search gift cards..."></div>
+      <div class="filter-row">
+        <div class="filter-chip active">All</div><div class="filter-chip">USA</div><div class="filter-chip">UK</div><div class="filter-chip">Canada</div><div class="filter-chip">Global</div>
+      </div>
+      <div class="section-label">🔥 Most Popular</div>
+      <div class="sell-card-item" onclick="startSell('apple','iTunes / Apple','USA Physical',750,'https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png','24px')">
+        <div class="card-icon apple"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" alt="Apple" style="width:24px;height:24px;object-fit:contain;"></div>
+        <div class="sell-card-body"><div class="sell-card-name">iTunes / Apple</div><div class="sell-card-sub">USA Physical · $25–$500</div><div class="sell-card-rate">₦750 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('apple','iTunes / Apple','USA Physical',750,'https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png','24px')">Sell</button>
+      </div>
+      <div class="sell-card-item" onclick="startSell('amazon','Amazon','USA E-code',680,'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg','36px')">
+        <div class="card-icon amazon"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" style="width:36px;height:36px;object-fit:contain;"></div>
+        <div class="sell-card-body"><div class="sell-card-name">Amazon</div><div class="sell-card-sub">USA E-code · $10–$200</div><div class="sell-card-rate">₦680 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('amazon','Amazon','USA E-code',680,'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg','36px')">Sell</button>
+      </div>
+      <div class="section-label" style="margin-top:6px;">All Cards</div>
+      <div class="sell-card-item" onclick="startSell('google','Google Play','USA Physical',620,'https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg','40px')">
+        <div class="card-icon google"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style="width:40px;height:40px;object-fit:contain;"></div>
+        <div class="sell-card-body"><div class="sell-card-name">Google Play</div><div class="sell-card-sub">USA Physical · $25–$500</div><div class="sell-card-rate">₦620 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('google','Google Play','USA Physical',620,'https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg','40px')">Sell</button>
+      </div>
+      <div class="sell-card-item" onclick="startSell('steam','Steam Wallet','Global',580,'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg','26px')">
+        <div class="card-icon steam"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" alt="Steam" style="width:26px;height:26px;object-fit:contain;"></div>
+        <div class="sell-card-body"><div class="sell-card-name">Steam Wallet</div><div class="sell-card-sub">Global · $20–$100</div><div class="sell-card-rate">₦580 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('steam','Steam Wallet','Global',580,'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg','26px')">Sell</button>
+      </div>
+      <div class="sell-card-item" onclick="startSell('visa','Visa Gift Card','USA Physical',540,'https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png','38px')">
+        <div class="card-icon visa"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" style="width:38px;height:38px;object-fit:contain;"></div>
+        <div class="sell-card-body"><div class="sell-card-name">Visa Gift Card</div><div class="sell-card-sub">USA Physical · $50–$500</div><div class="sell-card-rate">₦540 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('visa','Visa Gift Card','USA Physical',540,'https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png','38px')">Sell</button>
+      </div>
+      <div class="sell-card-item" style="margin-bottom:20px;" onclick="startSell('razer','Razer Gold','Global',560,'https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg','32px')">
+        <div class="card-icon razer"><img src="https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg" alt="Razer" style="width:32px;height:32px;object-fit:contain;"></div>
+        <div class="sell-card-body"><div class="sell-card-name">Razer Gold</div><div class="sell-card-sub">Global · $5–$100</div><div class="sell-card-rate">₦560 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('razer','Razer Gold','Global',560,'https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg','32px')">Sell</button>
+      </div>
+    </div>
+
+    <!-- ══ SELL STEP 1: UPLOAD ══ -->
+    <div class="page" id="page-sell-upload">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('sell')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Upload Card Image</h3>
+      </div>
+      <!-- Step Indicator -->
+      <div class="step-indicator">
+        <div class="step-dot active" id="sdot1">1</div>
+        <div class="step-line" id="sline1"></div>
+        <div class="step-dot" id="sdot2">2</div>
+        <div class="step-line" id="sline2"></div>
+        <div class="step-dot" id="sdot3">✓</div>
+      </div>
+      <!-- Hero card -->
+      <div class="upload-card-hero" id="upload-hero">
+        <div class="card-icon-lg apple" id="upload-hero-icon"><img id="upload-hero-img" src="" alt="" style="width:28px;height:28px;object-fit:contain;"></div>
+        <div class="card-hero-info"><h3 id="upload-hero-name">iTunes / Apple</h3><p id="upload-hero-sub">USA Physical</p></div>
+        <div class="card-hero-rate"><span>Rate</span><strong id="upload-hero-rate">₦750/$</strong></div>
+      </div>
+      <!-- Upload zone -->
+      <div class="upload-zone" id="upload-zone">
+        <div class="upload-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+        <h4>Upload card image</h4>
+        <p>Take a clear photo of both sides of your gift card</p>
+        <input type="file" accept="image/*" id="card-img-input" onchange="handleImgUpload(this)">
+        <img class="upload-preview" id="upload-preview" src="" alt="" style="display:none;">
+        <button class="upload-change-btn" id="upload-change-btn" style="display:none;" onclick="event.stopPropagation();document.getElementById('card-img-input').click()">Change Photo</button>
+      </div>
+      <!-- Tips -->
+      <div class="upload-tips">
+        <h5>📸 Photo Tips</h5>
+        <div class="tip-row"><div class="tip-dot"></div><p>Ensure card number and PIN are clearly visible</p></div>
+        <div class="tip-row"><div class="tip-dot"></div><p>Good lighting — avoid glare and shadows</p></div>
+        <div class="tip-row"><div class="tip-dot"></div><p>Scratch off the PIN cover completely</p></div>
+        <div class="tip-row"><div class="tip-dot"></div><p>Upload both front and back for faster processing</p></div>
+      </div>
+      <button class="flow-next-btn" id="upload-next-btn" disabled onclick="goToStep2()">
+        Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
+    <!-- ══ SELL STEP 2: DENOMINATION ══ -->
+    <div class="page" id="page-sell-denom">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('sell-upload')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Card Value</h3>
+      </div>
+      <div class="step-indicator">
+        <div class="step-dot done">✓</div>
+        <div class="step-line done"></div>
+        <div class="step-dot active" id="sdot2b">2</div>
+        <div class="step-line" id="sline2b"></div>
+        <div class="step-dot" id="sdot3b">3</div>
+      </div>
+      <div class="denom-card-hero" id="denom-hero">
+        <div class="card-icon-lg apple" id="denom-hero-icon"><img id="denom-hero-img" src="" alt="" style="width:28px;height:28px;object-fit:contain;"></div>
+        <div class="card-hero-info"><h3 id="denom-hero-name">iTunes / Apple</h3><p id="denom-hero-sub">USA Physical</p></div>
+        <div class="card-hero-rate"><span>Rate</span><strong id="denom-hero-rate">₦750/$</strong></div>
+      </div>
+      <div style="padding:0 16px 14px;font-size:13px;font-weight:600;color:#666;">Select denomination</div>
+      <div class="denom-grid" id="denom-grid">
+        <!-- populated by JS -->
+      </div>
+      <div class="denom-divider"><span>OR enter custom amount</span></div>
+      <div class="custom-amount-wrap">
+        <div class="custom-label">Custom Amount</div>
+        <div class="custom-input-row">
+          <span class="dollar-sign">$</span>
+          <input class="custom-amount-input" type="number" id="custom-amt" placeholder="0" min="1" max="1000" oninput="onCustomAmount(this.value)">
+        </div>
+      </div>
+      <div class="denom-payout-preview" id="payout-preview" style="display:none;">
+        <div class="payout-row"><span class="payout-label">Card Value</span><span class="payout-value" id="p-card-val">$0</span></div>
+        <div class="payout-row"><span class="payout-label">Rate</span><span class="payout-value" id="p-rate">₦0/$</span></div>
+        <div class="payout-row"><span class="payout-label">Processing Fee (2%)</span><span class="payout-value" id="p-fee" style="color:#e53935;">−₦0</span></div>
+        <div class="payout-row"><span class="payout-total-label">You Receive</span><span class="payout-total-value" id="p-total">₦0</span></div>
+      </div>
+      <button class="flow-next-btn" id="denom-next-btn" disabled onclick="submitSell()">
+        Submit Card <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
+    <!-- ══ SUCCESS ══ -->
+    <div class="page" id="page-sell-success">
+      <div class="success-page" id="success-inner">
+        <div class="success-lottie">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <circle cx="30" cy="30" r="28" stroke="#00b140" stroke-width="3"/>
+            <polyline class="success-checkmark" points="18,30 26,38 42,22" stroke="#00b140" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-dasharray="60" stroke-dashoffset="60"/>
+          </svg>
+        </div>
+        <div class="success-title">Card Submitted! 🎉</div>
+        <div class="success-sub" id="success-sub">Your card is being verified.<br>Payout is on the way!</div>
+        <div class="success-card">
+          <div class="success-card-header">
+            <div class="card-icon apple" id="sc-icon"><img id="sc-img" src="" alt="" style="width:24px;height:24px;object-fit:contain;"></div>
+            <div><div style="font-size:14px;font-weight:700;color:#111;" id="sc-name">iTunes / Apple</div><div style="font-size:11px;color:#aaa;margin-top:2px;" id="sc-sub">USA Physical</div></div>
+            <div style="margin-left:auto;font-size:11px;color:#aaa;">Ref: <strong style="color:#111;" id="sc-ref">#CS00001</strong></div>
+          </div>
+          <div class="success-amount" id="sc-payout">₦0</div>
+          <div class="success-ref">Expected within 5–15 minutes</div>
+          <div class="success-row"><span class="success-row-label">Card Value</span><span class="success-row-value" id="sc-val">$0</span></div>
+          <div class="success-row"><span class="success-row-label">Rate Applied</span><span class="success-row-value" id="sc-rate">₦0/$</span></div>
+          <div class="success-row"><span class="success-row-label">Processing Fee</span><span class="success-row-value" style="color:#e53935;" id="sc-fee">−₦0</span></div>
+          <div class="success-row"><span class="success-row-label">Status</span><span style="font-size:12px;font-weight:700;background:#e8f5e9;color:#00b140;padding:3px 10px;border-radius:10px;">Pending</span></div>
+        </div>
+        <div class="success-actions">
+          <button class="btn-home" onclick="navigate('home')">Go Home</button>
+          <button class="btn-sell-another" onclick="navigate('sell')">Sell Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RATES ══ -->
+    <div class="page" id="page-rates">
+      <div class="page-title-header"><h2>Live Rates</h2><p>Updated just now</p></div>
+      <div class="rates-summary">
+        <div class="rates-stat"><div class="stat-label">Best Rate Today</div><div class="stat-value">₦750/$</div><div class="stat-change up">▲ +₦20 from yesterday</div></div>
+        <div class="rates-stat"><div class="stat-label">Cards Traded</div><div class="stat-value">1,204</div><div class="stat-change up">▲ 8% this week</div></div>
+      </div>
+      <div class="rate-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search card rates..."></div>
+      <div style="background:white;margin:0 16px;border-radius:14px;overflow:hidden;">
+        <div class="rate-card-item"><div class="card-icon apple"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" alt="Apple" style="width:24px;height:24px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">iTunes / Apple</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦750/$</div><div class="rate-badge hot">🔥 Hot</div></div></div>
+        <div class="rate-card-item"><div class="card-icon amazon"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" style="width:36px;height:36px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Amazon</div><div class="rate-sub">USA E-code</div></div><div class="rate-right"><div class="rate-val">₦680/$</div><div class="rate-badge hot">🔥 Hot</div></div></div>
+        <div class="rate-card-item"><div class="card-icon google"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style="width:40px;height:40px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Google Play</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦620/$</div><div class="rate-badge low">▼ Low</div></div></div>
+        <div class="rate-card-item"><div class="card-icon steam"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" alt="Steam" style="width:26px;height:26px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Steam Wallet</div><div class="rate-sub">Global</div></div><div class="rate-right"><div class="rate-val">₦580/$</div><div class="rate-badge stable">— Stable</div></div></div>
+        <div class="rate-card-item"><div class="card-icon visa"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" style="width:38px;height:38px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Visa Gift Card</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦540/$</div><div class="rate-badge low">▼ Low</div></div></div>
+        <div class="rate-card-item"><div class="card-icon razer"><img src="https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg" alt="Razer" style="width:32px;height:32px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Razer Gold</div><div class="rate-sub">Global</div></div><div class="rate-right"><div class="rate-val">₦560/$</div><div class="rate-badge stable">— Stable</div></div></div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="page" id="page-settings">
+      <div class="page-title-header"><h2>Settings</h2><p>Manage your account & preferences</p></div>
+      <div class="profile-card">
+        <div class="profile-avatar">J</div>
+        <div class="profile-info"><div class="profile-name">orjiace</div><div class="profile-email">orjiace&#64;gmail&#46;com</div></div>
+        <div class="profile-badge">Basic</div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Account</div>
+        <div class="settings-group">
+          <div class="settings-item" onclick="navigate('settings-personal')"><div class="settings-item-icon" style="background:#e8f5e9;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="settings-item-label">Personal Info</div><div class="settings-item-value">›</div></div>
+          <div class="settings-item" onclick="navigate('settings-banks')"><div class="settings-item-icon" style="background:#e3f2fd;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1976d2" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div class="settings-item-label">Bank Accounts</div><div class="settings-item-value">2 linked ›</div></div>
+          <div class="settings-item" onclick="navigate('settings-kyc')"><div class="settings-item-icon" style="background:#f3e5f5;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7b1fa2" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="settings-item-label">KYC Verification</div><div class="settings-item-value" style="color:#f57c00;">Pending ›</div></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Preferences</div>
+        <div class="settings-group">
+          <div class="settings-item"><div class="settings-item-icon" style="background:#fff8e1;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f9a825" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-item-label">Notifications</div><div class="stoggle" onclick="this.classList.toggle('off')"></div></div>
+          <div class="settings-item"><div class="settings-item-icon" style="background:#fce4ec;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e91e63" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="settings-item-label">Dark Mode</div><div class="stoggle off" onclick="this.classList.toggle('off')"></div></div>
+          <div class="settings-item" onclick="navigate('settings-language')"><div class="settings-item-icon" style="background:#e8eaf6;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3f51b5" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div><div class="settings-item-label">Language</div><div class="settings-item-value" id="lang-display">English ›</div></div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Security</div>
+        <div class="settings-group">
+          <div class="settings-item" onclick="navigate('settings-pin')"><div class="settings-item-icon" style="background:#e8f5e9;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="settings-item-label">Change PIN</div><div class="settings-item-value">›</div></div>
+          <div class="settings-item"><div class="settings-item-icon" style="background:#fff8e1;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f9a825" stroke-width="2" stroke-linecap="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="settings-item-label">Biometrics</div><div class="stoggle" onclick="this.classList.toggle('off')"></div></div>
+        </div>
+      </div>
+      <button class="logout-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log Out</button>
+    </div>
+
+    <!-- ══ WITHDRAW: AMOUNT + BANK ══ -->
+    <div class="page" id="page-wd-amount">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Withdraw Funds</h3>
+      </div>
+      <div class="wd-balance-card">
+        <div class="wd-bal-label">Available Balance</div>
+        <div class="wd-bal-amount">₦ 247,500</div>
+        <div class="wd-bal-hint">Minimum withdrawal: ₦1,000</div>
+      </div>
+      <div class="wd-amount-wrap">
+        <div class="wd-amount-label">Enter Amount</div>
+        <div class="wd-amount-row">
+          <span class="wd-currency">₦</span>
+          <input class="wd-amount-input" type="number" id="wd-amount" placeholder="0" oninput="onWdAmount(this.value)">
+        </div>
+      </div>
+      <div class="wd-quick-row">
+        <div class="wd-quick-chip" onclick="setWdAmount(5000)">₦5K</div>
+        <div class="wd-quick-chip" onclick="setWdAmount(10000)">₦10K</div>
+        <div class="wd-quick-chip" onclick="setWdAmount(20000)">₦20K</div>
+        <div class="wd-quick-chip" onclick="setWdAmount(50000)">₦50K</div>
+      </div>
+      <div class="wd-section-title">Select Bank Account</div>
+      <div class="wd-bank-list">
+        <div class="wd-bank-item selected" id="wd-bank-0" onclick="selectBank(0)">
+          <div class="wd-bank-logo" style="background:#e3f2fd;color:#1565c0;">GT</div>
+          <div class="wd-bank-info"><div class="wd-bank-name">GTBank</div><div class="wd-bank-acct">•••• •••• 4821 · Savings</div></div>
+          <div class="wd-bank-radio"></div>
+        </div>
+        <div class="wd-bank-item" id="wd-bank-1" onclick="selectBank(1)">
+          <div class="wd-bank-logo" style="background:#fff3e0;color:#e65100;">ZB</div>
+          <div class="wd-bank-info"><div class="wd-bank-name">Zenith Bank</div><div class="wd-bank-acct">•••• •••• 9034 · Current</div></div>
+          <div class="wd-bank-radio"></div>
+        </div>
+        <div class="wd-bank-item" id="wd-bank-2" onclick="selectBank(2)">
+          <div class="wd-bank-logo" style="background:#e8f5e9;color:#1b5e20;">OP</div>
+          <div class="wd-bank-info"><div class="wd-bank-name">Opay</div><div class="wd-bank-acct">•••• •••• 2210 · Wallet</div></div>
+          <div class="wd-bank-radio"></div>
+        </div>
+      </div>
+      <div class="wd-add-bank">
+        <div class="wd-add-bank-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <span>Add new bank account</span>
+      </div>
+      <div class="wd-section-title">Summary</div>
+      <div class="wd-fee-box">
+        <div class="wd-fee-row"><span class="wd-fee-label">Amount</span><span class="wd-fee-value" id="wd-sum-amount">₦0</span></div>
+        <div class="wd-fee-row"><span class="wd-fee-label">Transfer Fee (1%)</span><span class="wd-fee-value" id="wd-sum-fee" style="color:#e53935;">−₦0</span></div>
+        <div class="wd-fee-row"><span class="wd-fee-total-label">You Receive</span><span class="wd-fee-total-value" id="wd-sum-net">₦0</span></div>
+      </div>
+      <button class="flow-next-btn" id="wd-next-btn" disabled onclick="goToWdConfirm()" style="margin-top:12px;">
+        Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ WITHDRAW: CONFIRM + PIN ══ -->
+    <div class="page" id="page-wd-confirm">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('wd-amount')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Confirm Withdrawal</h3>
+      </div>
+      <div class="wd-confirm-hero">
+        <div class="hero-label">You are withdrawing</div>
+        <div class="hero-amount" id="wd-conf-amount">₦0</div>
+        <div class="hero-sub" id="wd-conf-net">You receive: ₦0</div>
+      </div>
+      <div class="wd-confirm-details">
+        <div class="wd-confirm-row">
+          <span class="wd-confirm-label">To Account</span>
+          <div class="wd-confirm-bank">
+            <div class="wd-confirm-bank-logo" id="wd-conf-bank-logo" style="background:#e3f2fd;color:#1565c0;">GT</div>
+            <span id="wd-conf-bank-name">GTBank · ••4821</span>
+          </div>
+        </div>
+        <div class="wd-confirm-row"><span class="wd-confirm-label">Transfer Fee</span><span class="wd-confirm-value" id="wd-conf-fee" style="color:#e53935;">−₦0</span></div>
+        <div class="wd-confirm-row"><span class="wd-confirm-label">Processing Time</span><span class="wd-confirm-value">Instant – 5 mins</span></div>
+        <div class="wd-confirm-row"><span class="wd-confirm-label">Date & Time</span><span class="wd-confirm-value" id="wd-conf-date">—</span></div>
+      </div>
+      <div class="wd-pin-section">
+        <div class="wd-pin-label">Enter your 4-digit PIN to confirm</div>
+        <div class="wd-pin-dots">
+          <div class="wd-pin-dot" id="pd0"></div>
+          <div class="wd-pin-dot" id="pd1"></div>
+          <div class="wd-pin-dot" id="pd2"></div>
+          <div class="wd-pin-dot" id="pd3"></div>
+        </div>
+        <div class="wd-numpad">
+          <button class="wd-num-btn" onclick="pinInput('1')">1</button>
+          <button class="wd-num-btn" onclick="pinInput('2')">2</button>
+          <button class="wd-num-btn" onclick="pinInput('3')">3</button>
+          <button class="wd-num-btn" onclick="pinInput('4')">4</button>
+          <button class="wd-num-btn" onclick="pinInput('5')">5</button>
+          <button class="wd-num-btn" onclick="pinInput('6')">6</button>
+          <button class="wd-num-btn" onclick="pinInput('7')">7</button>
+          <button class="wd-num-btn" onclick="pinInput('8')">8</button>
+          <button class="wd-num-btn" onclick="pinInput('9')">9</button>
+          <button class="wd-num-btn empty"></button>
+          <button class="wd-num-btn" onclick="pinInput('0')">0</button>
+          <button class="wd-num-btn del" onclick="pinDelete()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 002-2V6a2 2 0 00-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
+        </div>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+
+    <!-- ══ WITHDRAW: SUCCESS ══ -->
+    <div class="page" id="page-wd-success">
+      <div class="wd-success-page">
+        <div class="wd-success-anim">
+          <svg width="56" height="56" viewBox="0 0 60 60" fill="none">
+            <circle cx="30" cy="30" r="28" stroke="#00b140" stroke-width="3"/>
+            <polyline id="wd-checkmark" points="18,30 26,38 42,22" stroke="#00b140" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-dasharray="60" stroke-dashoffset="60"/>
+          </svg>
+        </div>
+        <div style="font-size:22px;font-weight:700;color:#111;margin-bottom:6px;text-align:center;">Withdrawal Sent! 🚀</div>
+        <div style="font-size:13px;color:#888;text-align:center;margin-bottom:24px;line-height:1.6;">Your funds are on their way<br>to your bank account.</div>
+        <div class="wd-receipt">
+          <div class="wd-receipt-amount" id="wds-amount">₦0</div>
+          <div class="wd-receipt-sub" id="wds-bank">GTBank · ••4821</div>
+          <hr class="wd-receipt-dashed">
+          <div class="wd-receipt-row"><span class="wd-receipt-label">Reference</span><span class="wd-receipt-value" id="wds-ref">#WD0000</span></div>
+          <div class="wd-receipt-row"><span class="wd-receipt-label">Transfer Fee</span><span class="wd-receipt-value" id="wds-fee">₦0</span></div>
+          <div class="wd-receipt-row"><span class="wd-receipt-label">Amount Credited</span><span class="wd-receipt-value" id="wds-net" style="color:#00b140;">₦0</span></div>
+          <div class="wd-receipt-row"><span class="wd-receipt-label">Date & Time</span><span class="wd-receipt-value" id="wds-date">—</span></div>
+          <div class="wd-receipt-row"><span class="wd-receipt-label">Status</span><span style="font-size:11px;font-weight:700;background:#e8f5e9;color:#00b140;padding:3px 10px;border-radius:10px;">Processing</span></div>
+        </div>
+        <div class="wd-timeline">
+          <div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;">Transfer Progress</div>
+          <div class="wd-timeline-item">
+            <div class="wd-tl-left"><div class="wd-tl-dot" style="background:#00b140;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="wd-tl-line"></div></div>
+            <div class="wd-tl-content"><div class="wd-tl-title">Request Approved</div><div class="wd-tl-time" id="wds-t1">Just now</div></div>
+          </div>
+          <div class="wd-timeline-item">
+            <div class="wd-tl-left"><div class="wd-tl-dot" style="background:#f57c00;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><polyline points="12 6 12 12 15 14"/></svg></div><div class="wd-tl-line"></div></div>
+            <div class="wd-tl-content"><div class="wd-tl-title">Transfer in Progress</div><div class="wd-tl-time">Processing (1–5 mins)</div></div>
+          </div>
+          <div class="wd-timeline-item">
+            <div class="wd-tl-left"><div class="wd-tl-dot" style="background:#eee;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div></div>
+            <div class="wd-tl-content"><div class="wd-tl-title" style="color:#aaa;">Credited to Bank</div><div class="wd-tl-time">Pending</div></div>
+          </div>
+        </div>
+        <div class="success-actions" style="width:100%;">
+          <button class="btn-home" onclick="navigate('home')">Go Home</button>
+          <button class="btn-sell-another" onclick="navigate('wd-amount')">New Withdrawal</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ TRANSACTION RECEIPT PAGE ══ -->
+    <div class="page" id="page-tx-receipt">
+      <div class="sub-header">
+        <div class="back-btn" id="rcpt-back-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Transaction Receipt</h3>
+        <div style="width:36px;"></div>
+      </div>
+
+      <!-- Capturable receipt area -->
+      <div id="receipt-capture">
+        <!-- Hero (colored by tx type) -->
+        <div class="rcpt-hero" id="rcpt-hero">
+          <div class="rcpt-type-icon" id="rcpt-type-icon"></div>
+          <div class="rcpt-amount" id="rcpt-amount">₦0</div>
+          <div class="rcpt-title" id="rcpt-title">Card Sale</div>
+          <div class="rcpt-status-pill" id="rcpt-status-pill">● Completed</div>
+        </div>
+
+        <!-- Top section: reference + date -->
+        <div class="rcpt-card" id="rcpt-top-card">
+          <div class="rcpt-row"><span class="rcpt-row-label">Reference</span><span class="rcpt-row-value" id="rcpt-ref">—</span></div>
+          <div class="rcpt-row"><span class="rcpt-row-label">Date & Time</span><span class="rcpt-row-value" id="rcpt-date">—</span></div>
+          <div class="rcpt-row"><span class="rcpt-row-label">Type</span><span class="rcpt-row-value" id="rcpt-type-label">—</span></div>
+        </div>
+
+        <!-- Dashed divider (ticket look) -->
+        <div class="rcpt-dashed-wrap"><hr class="rcpt-dashed-line"></div>
+
+        <!-- Bottom section: specifics -->
+        <div class="rcpt-card" id="rcpt-detail-card">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Action buttons (outside capture area) -->
+      <button class="rcpt-download-btn" id="rcpt-download-btn" onclick="downloadReceipt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Save as Image
+      </button>
+      <button class="rcpt-share-btn" onclick="navigate('home');switchTab('tx')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Back to Transactions
+      </button>
+    </div>
+
+
+    <!-- ══ NOTIFICATIONS ══ -->
+    <div class="page" id="page-notifications">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Notifications</h3>
+        <div style="width:36px;"></div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="notif-filter-row">
+        <div class="filter-chip active" onclick="filterNotifs('all',this)">All</div>
+        <div class="filter-chip" onclick="filterNotifs('transactions',this)">Transactions</div>
+        <div class="filter-chip" onclick="filterNotifs('promotions',this)">Promotions</div>
+        <div class="filter-chip" onclick="filterNotifs('account',this)">Account</div>
+      </div>
+
+      <div class="notif-mark-all" onclick="markAllRead()">Mark all as read</div>
+
+      <div id="notif-list"></div>
+    </div>
+
+    <!-- ══ SUPPORT ══ -->
+    <div class="page" id="page-support">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Help & Support</h3>
+        <div style="width:36px;"></div>
+      </div>
+
+      <!-- Hero -->
+      <div class="support-hero">
+        <div style="width:60px;height:60px;background:rgba(255,255,255,.1);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>
+        </div>
+        <h3>How can we help?</h3>
+        <p>Our support team is available 24/7<br>to assist with any questions.</p>
+        <div class="support-status"><div class="support-status-dot"></div>Support Online · Avg reply 2 min</div>
+      </div>
+
+      <!-- Contact channels -->
+      <div class="support-section">
+        <div class="support-section-title">Contact Us</div>
+        <div class="support-channels">
+          <div class="support-channel" onclick="openChat()">
+            <div class="support-channel-icon" style="background:#e8f5e9;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div class="support-channel-name">Live Chat</div>
+            <div class="support-channel-sub">Reply in ~2 min</div>
+          </div>
+          <div class="support-channel">
+            <div class="support-channel-icon" style="background:#e3f2fd;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div class="support-channel-name">Email Us</div>
+            <div class="support-channel-sub">Reply in 24h</div>
+          </div>
+          <div class="support-channel">
+            <div class="support-channel-icon" style="background:#f3e5f5;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7b1fa2" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/></svg>
+            </div>
+            <div class="support-channel-name">Call Us</div>
+            <div class="support-channel-sub">Mon–Fri 9–6pm</div>
+          </div>
+          <div class="support-channel">
+            <div class="support-channel-icon" style="background:#e8f5e9;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2" stroke-linecap="round"><path d="M21 2H3a1 1 0 00-1 1v14a1 1 0 001 1h3v4l4-4h11a1 1 0 001-1V3a1 1 0 00-1-1z"/></svg>
+            </div>
+            <div class="support-channel-name">WhatsApp</div>
+            <div class="support-channel-sub">Reply in ~5 min</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="support-section">
+        <div class="support-section-title">Frequently Asked</div>
+        <div id="faq-list">
+          <div class="support-faq-item">
+            <div class="support-faq-q" onclick="toggleFaq(this)">
+              <span>How long does card verification take?</span>
+              <svg class="support-faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="support-faq-a">Card verification typically takes 5–15 minutes. During peak hours it may take up to 30 minutes. You'll receive a notification once your card has been verified and funds credited.</div>
+          </div>
+          <div class="support-faq-item">
+            <div class="support-faq-q" onclick="toggleFaq(this)">
+              <span>Why was my card rejected?</span>
+              <svg class="support-faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="support-faq-a">Cards may be rejected due to an invalid PIN, already-redeemed balance, unreadable image, or unsupported card type. Ensure the card is unused and the photo is clear with the PIN fully visible.</div>
+          </div>
+          <div class="support-faq-item">
+            <div class="support-faq-q" onclick="toggleFaq(this)">
+              <span>How do I withdraw my earnings?</span>
+              <svg class="support-faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="support-faq-a">Tap "Withdraw" on your wallet card, enter the amount, select a linked bank account, and confirm with your PIN. Transfers are instant to most Nigerian banks.</div>
+          </div>
+          <div class="support-faq-item">
+            <div class="support-faq-q" onclick="toggleFaq(this)">
+              <span>What are the withdrawal limits?</span>
+              <svg class="support-faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="support-faq-a">Minimum withdrawal is ₦1,000. Daily limit for Basic accounts is ₦200,000. Complete KYC verification to unlock a ₦2,000,000 daily limit.</div>
+          </div>
+          <div class="support-faq-item">
+            <div class="support-faq-q" onclick="toggleFaq(this)">
+              <span>How do I complete KYC verification?</span>
+              <svg class="support-faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="support-faq-a">Go to Settings → KYC Verification. You'll need to provide a valid government ID (NIN, driver's licence, or passport) and a selfie. Verification is typically completed within 24 hours.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="support-chat-btn" onclick="openChat()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Start Live Chat
+      </button>
+
+      <!-- Live chat panel (slides up) -->
+      <div id="chat-panel" style="display:none;margin:0 16px 24px;background:white;border-radius:20px;overflow:hidden;">
+        <div style="background:#111;padding:16px;display:flex;align-items:center;gap:12px;">
+          <div style="width:36px;height:36px;background:#333;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:white;">CardSwap Support</div>
+            <div style="font-size:11px;color:#00e676;display:flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;background:#00e676;border-radius:50%;display:inline-block;"></span>Online now</div>
+          </div>
+          <div onclick="closeChat()" style="margin-left:auto;cursor:pointer;width:28px;height:28px;background:rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>
+        </div>
+        <div id="chat-messages" style="padding:16px;min-height:160px;display:flex;flex-direction:column;gap:10px;">
+          <div style="align-self:flex-start;max-width:80%;">
+            <div style="background:#f5f5f5;border-radius:4px 16px 16px 16px;padding:10px 14px;font-size:13px;color:#111;line-height:1.5;">Hi there! 👋 I'm here to help. What can I assist you with today?</div>
+            <div style="font-size:10px;color:#bbb;margin-top:4px;padding-left:4px;">Support · just now</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid #f0f0f0;">
+          <input id="chat-input" type="text" placeholder="Type your message..." style="flex:1;border:1.5px solid #eee;border-radius:10px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;" onkeydown="if(event.key==='Enter')sendChatMsg()">
+          <button onclick="sendChatMsg()" style="width:40px;height:40px;background:#111;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div style="height:8px;"></div>
+    </div>
+
+
+    <!-- ══ PERSONAL INFO ══ -->
+    <div class="page" id="page-settings-personal">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('settings')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Personal Info</h3>
+        <div style="width:36px;"></div>
+      </div>
+      <div class="avatar-edit-wrap">
+        <div class="avatar-lg">J<div class="avatar-edit-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div>
+        <div class="avatar-name">orjiace</div>
+        <div class="avatar-sub">Tap to change photo</div>
+      </div>
+      <div class="settings-form-wrap">
+        <div class="settings-form-row">
+          <div class="settings-form-label">First Name</div>
+          <input class="settings-form-input" type="text" value="Ace" placeholder="First name">
+        </div>
+        <div class="settings-form-row">
+          <div class="settings-form-label">Last Name</div>
+          <input class="settings-form-input" type="text" value="Orji" placeholder="Last name">
+        </div>
+        <div class="settings-form-row">
+          <div class="settings-form-label">Username</div>
+          <input class="settings-form-input" type="text" value="orjiace" placeholder="Username">
+        </div>
+        <div class="settings-form-row">
+          <div class="settings-form-label">Email Address</div>
+          <div class="settings-form-static">orjiace&#64;gmail&#46;com</div>
+        </div>
+        <div class="settings-form-row">
+          <div class="settings-form-label">Phone Number</div>
+          <input class="settings-form-input" type="tel" value="+234 801 234 5678" placeholder="Phone number">
+        </div>
+        <div class="settings-form-row">
+          <div class="settings-form-label">Date of Birth</div>
+          <input class="settings-form-input" type="text" value="12 / Mar / 1998" placeholder="DD / MMM / YYYY">
+        </div>
+        <div class="settings-form-row">
+          <div class="settings-form-label">Gender</div>
+          <select class="settings-form-input" style="appearance:none;cursor:pointer;">
+            <option>Male</option><option>Female</option><option>Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="settings-info-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p>Some fields may require KYC re-verification after changes. Your email address cannot be changed.</p>
+      </div>
+      <button class="settings-save-btn" onclick="showSavedToast()">Save Changes</button>
+      <div style="height:16px;"></div>
+    </div>
+
+    <!-- ══ BANK ACCOUNTS ══ -->
+    <div class="page" id="page-settings-banks">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('settings')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Bank Accounts</h3>
+        <div style="width:36px;"></div>
+      </div>
+      <div style="padding:0 16px 14px;font-size:13px;color:#888;">Linked accounts for withdrawals</div>
+
+      <div class="bank-card">
+        <div class="bank-card-logo" style="background:#e3f2fd;color:#1565c0;">GT</div>
+        <div class="bank-card-info">
+          <div class="bank-card-name">GTBank</div>
+          <div class="bank-card-acct">•••• •••• •••• 4821</div>
+          <div style="display:flex;gap:6px;margin-top:5px;"><span class="bank-card-default">Default</span><span class="bank-card-type">Savings</span></div>
+        </div>
+        <div class="bank-card-menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><circle cx="12" cy="5" r="1" fill="#aaa"/><circle cx="12" cy="12" r="1" fill="#aaa"/><circle cx="12" cy="19" r="1" fill="#aaa"/></svg></div>
+      </div>
+
+      <div class="bank-card">
+        <div class="bank-card-logo" style="background:#fff3e0;color:#e65100;">ZB</div>
+        <div class="bank-card-info">
+          <div class="bank-card-name">Zenith Bank</div>
+          <div class="bank-card-acct">•••• •••• •••• 9034</div>
+          <div style="margin-top:5px;"><span class="bank-card-type">Current</span></div>
+        </div>
+        <div class="bank-card-menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><circle cx="12" cy="5" r="1" fill="#aaa"/><circle cx="12" cy="12" r="1" fill="#aaa"/><circle cx="12" cy="19" r="1" fill="#aaa"/></svg></div>
+      </div>
+
+      <div class="add-bank-btn" onclick="showAddBankSheet()">
+        <div style="width:48px;height:48px;border-radius:14px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <span>Add new bank account</span>
+      </div>
+
+      <div class="settings-info-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p>Withdrawals are sent to your default account. Tap ⋮ on any account to set it as default or remove it.</p>
+      </div>
+
+      <!-- Add bank bottom sheet -->
+      <div id="add-bank-sheet" style="display:none;margin:0 16px 20px;background:white;border-radius:20px;padding:20px;">
+        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:16px;">Add Bank Account</div>
+        <div class="settings-form-wrap" style="margin:0 0 14px;">
+          <div class="settings-form-row">
+            <div class="settings-form-label">Bank Name</div>
+            <select class="settings-form-input" style="appearance:none;cursor:pointer;">
+              <option value="">Select bank...</option>
+              <option>Access Bank</option><option>First Bank</option><option>GTBank</option><option>Kuda Bank</option><option>Opay</option><option>UBA</option><option>Zenith Bank</option>
+            </select>
+          </div>
+          <div class="settings-form-row">
+            <div class="settings-form-label">Account Number</div>
+            <input class="settings-form-input" type="number" placeholder="0123456789" maxlength="10">
+          </div>
+          <div class="settings-form-row">
+            <div class="settings-form-label">Account Name</div>
+            <div class="settings-form-static muted">Will be resolved automatically</div>
+          </div>
+        </div>
+        <button class="settings-save-btn" style="margin:0 0 10px;" onclick="document.getElementById('add-bank-sheet').style.display='none';showSavedToast()">Add Account</button>
+        <button onclick="document.getElementById('add-bank-sheet').style.display='none'" style="width:100%;background:transparent;border:none;font-family:'DM Sans',sans-serif;font-size:14px;color:#aaa;cursor:pointer;padding:8px;">Cancel</button>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+
+    <!-- ══ KYC VERIFICATION ══ -->
+    <div class="page" id="page-settings-kyc">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('settings')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>KYC Verification</h3>
+        <div style="width:36px;"></div>
+      </div>
+
+      <div class="kyc-tier-box">
+        <div class="kyc-tier-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="kyc-tier-info">
+          <h4>Basic Tier · Upgrade Available</h4>
+          <p>Daily limit: ₦200,000 · Upgrade to ₦2,000,000</p>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 14px;font-size:13px;color:#888;line-height:1.5;">Complete all steps below to verify your identity and unlock full platform benefits.</div>
+
+      <div class="kyc-steps">
+        <!-- Step 1: Done -->
+        <div class="kyc-step">
+          <div class="kyc-step-left"><div class="kyc-step-num done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="kyc-step-line"></div></div>
+          <div class="kyc-step-content"><div class="kyc-step-title">Email Verified ✓</div><div class="kyc-step-sub">orjiace&#64;gmail&#46;com verified</div></div>
+        </div>
+        <!-- Step 2: Done -->
+        <div class="kyc-step">
+          <div class="kyc-step-left"><div class="kyc-step-num done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="kyc-step-line"></div></div>
+          <div class="kyc-step-content"><div class="kyc-step-title">Phone Verified ✓</div><div class="kyc-step-sub">+234 801 234 5678 verified</div></div>
+        </div>
+        <!-- Step 3: Active -->
+        <div class="kyc-step">
+          <div class="kyc-step-left"><div class="kyc-step-num active">3</div><div class="kyc-step-line"></div></div>
+          <div class="kyc-step-content">
+            <div class="kyc-step-title">Government ID</div>
+            <div class="kyc-step-sub">Upload a valid NIN slip, driver's licence, or international passport</div>
+            <div class="kyc-upload-box">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <p>Tap to upload ID document</p>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <div style="flex:1;background:#f8f8f8;border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:#666;">NIN Slip</div>
+              <div style="flex:1;background:#f8f8f8;border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:#666;">Driver's Licence</div>
+              <div style="flex:1;background:#f8f8f8;border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:#666;">Passport</div>
+            </div>
+          </div>
+        </div>
+        <!-- Step 4: Todo -->
+        <div class="kyc-step">
+          <div class="kyc-step-left"><div class="kyc-step-num todo">4</div><div class="kyc-step-line"></div></div>
+          <div class="kyc-step-content">
+            <div class="kyc-step-title" style="color:#aaa;">Selfie Verification</div>
+            <div class="kyc-step-sub">Take a selfie holding your ID document</div>
+          </div>
+        </div>
+        <!-- Step 5: Todo -->
+        <div class="kyc-step">
+          <div class="kyc-step-left"><div class="kyc-step-num todo">5</div></div>
+          <div class="kyc-step-content">
+            <div class="kyc-step-title" style="color:#aaa;">Review & Approval</div>
+            <div class="kyc-step-sub">Our team reviews within 24 hours</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="settings-save-btn" onclick="showSavedToast()">Submit for Verification</button>
+      <div style="height:16px;"></div>
+    </div>
+
+    <!-- ══ LANGUAGE ══ -->
+    <div class="page" id="page-settings-language">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('settings')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Language</h3>
+        <div style="width:36px;"></div>
+      </div>
+      <div style="padding:0 16px 14px;font-size:13px;color:#888;">Select your preferred display language</div>
+
+      <div style="margin:0 16px;background:white;border-radius:16px;overflow:hidden;">
+        <div class="lang-item" onclick="selectLang('English', this)"><span class="lang-flag">🇬🇧</span><span class="lang-name">English</span><svg class="lang-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="lang-item" onclick="selectLang('Français', this)"><span class="lang-flag">🇫🇷</span><span class="lang-name">Français</span></div>
+        <div class="lang-item" onclick="selectLang('Pidgin', this)"><span class="lang-flag">🇳🇬</span><span class="lang-name">Nigerian Pidgin</span></div>
+        <div class="lang-item" onclick="selectLang('Hausa', this)"><span class="lang-flag">🇳🇬</span><span class="lang-name">Hausa</span></div>
+        <div class="lang-item" onclick="selectLang('Yoruba', this)"><span class="lang-flag">🇳🇬</span><span class="lang-name">Yoruba</span></div>
+        <div class="lang-item" onclick="selectLang('Igbo', this)"><span class="lang-flag">🇳🇬</span><span class="lang-name">Igbo</span></div>
+        <div class="lang-item" onclick="selectLang('Español', this)"><span class="lang-flag">🇪🇸</span><span class="lang-name">Español</span></div>
+        <div class="lang-item" onclick="selectLang('Português', this)"><span class="lang-flag">🇵🇹</span><span class="lang-name">Português</span></div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ CHANGE PIN ══ -->
+    <div class="page" id="page-settings-pin">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('settings');resetPinFlow()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3 id="pin-page-title">Change PIN</h3>
+        <div style="width:36px;"></div>
+      </div>
+
+      <!-- Progress bar -->
+      <div style="display:flex;gap:6px;padding:0 16px 20px;">
+        <div id="pin-prog-1" style="flex:1;height:4px;border-radius:2px;background:#111;transition:background .3s;"></div>
+        <div id="pin-prog-2" style="flex:1;height:4px;border-radius:2px;background:#eee;transition:background .3s;"></div>
+        <div id="pin-prog-3" style="flex:1;height:4px;border-radius:2px;background:#eee;transition:background .3s;"></div>
+      </div>
+
+      <div class="pin-step-title" id="pin-step-label">Enter your current PIN</div>
+      <div style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;" id="pin-dots-row">
+        <div class="pin-step-dot" id="sp0"></div>
+        <div class="pin-step-dot" id="sp1"></div>
+        <div class="pin-step-dot" id="sp2"></div>
+        <div class="pin-step-dot" id="sp3"></div>
+      </div>
+
+      <div class="pin-step-numpad">
+        <button class="pin-step-num" onclick="spInput('1')">1</button>
+        <button class="pin-step-num" onclick="spInput('2')">2</button>
+        <button class="pin-step-num" onclick="spInput('3')">3</button>
+        <button class="pin-step-num" onclick="spInput('4')">4</button>
+        <button class="pin-step-num" onclick="spInput('5')">5</button>
+        <button class="pin-step-num" onclick="spInput('6')">6</button>
+        <button class="pin-step-num" onclick="spInput('7')">7</button>
+        <button class="pin-step-num" onclick="spInput('8')">8</button>
+        <button class="pin-step-num" onclick="spInput('9')">9</button>
+        <button class="pin-step-num empty"></button>
+        <button class="pin-step-num" onclick="spInput('0')">0</button>
+        <button class="pin-step-num del" onclick="spDelete()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 002-2V6a2 2 0 00-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
+      </div>
+
+      <!-- Success state (hidden) -->
+      <div id="pin-success" style="display:none;flex-direction:column;align-items:center;padding:40px 24px;">
+        <div style="width:80px;height:80px;background:#e8f5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:popIn .5s cubic-bezier(.175,.885,.32,1.4) both;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="font-size:20px;font-weight:700;color:#111;margin-bottom:8px;">PIN Changed!</div>
+        <div style="font-size:13px;color:#888;text-align:center;margin-bottom:28px;">Your PIN has been updated successfully.</div>
+        <button class="settings-save-btn" style="width:100%;max-width:260px;" onclick="navigate('settings');resetPinFlow()">Back to Settings</button>
+      </div>
+    </div>
+
+    <!-- ══ TOAST ══ -->
+    <div id="toast" style="position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:white;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;">Changes saved!</div>
+
+
+  </div><!-- /pages-wrapper -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav" id="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="navigate('home')">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" id="nav-sell" onclick="navigate('sell')">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+      <span class="nav-label">Sell Cards</span>
+    </div>
+    <div class="nav-item" id="nav-rates" onclick="navigate('rates')">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+      <span class="nav-label">Rates</span>
+    </div>
+    <div class="nav-item" id="nav-settings" onclick="navigate('settings')">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      <span class="nav-label">Settings</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+// ── CLOCK ──
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    n.getHours().toString().padStart(2,'0') + ':' + n.getMinutes().toString().padStart(2,'0');
+}
+
+// ── STATE ──
+const FLOW_PAGES = ['sell-upload','sell-denom','sell-success'];
+const NAV_PAGES  = ['home','sell','rates','settings'];
+let cur = 'home';
+let sellCard = {};
+let selectedDenom = 0;
+
+// ── NAVIGATION ──
+function navigate(p) {
+  document.getElementById('page-' + cur).classList.remove('active');
+  document.getElementById('nav-' + cur)?.classList.remove('active');
+  cur = p;
+  const next = document.getElementById('page-' + cur);
+  next.classList.add('active');
+  next.scrollTop = 0;
+  NAV_PAGES.forEach(id => document.getElementById('nav-' + id).classList.remove('active'));
+  if (NAV_PAGES.includes(p)) {
+    document.getElementById('nav-' + p).classList.add('active');
+  } else if (['sell-upload','sell-denom','sell-success'].includes(p)) {
+    document.getElementById('nav-sell').classList.add('active');
+  } else if (['wd-amount','wd-confirm','wd-success'].includes(p)) {
+    document.getElementById('nav-home').classList.add('active');
+  } else if (p === 'tx-receipt') {
+    document.getElementById('nav-home').classList.add('active');
+  }
+  if (p === 'notifications') renderNotifList();
+  const hideNav = ['sell-success','wd-success'].includes(p);
+  document.getElementById('bottom-nav').style.display = hideNav ? 'none' : 'flex';
+}
+
+// ── HOME TABS ──
+function switchTab(t) {
+  const isTx = t === 'tx';
+  document.getElementById('tab-tx').classList.toggle('active', isTx);
+  document.getElementById('tab-gr').classList.toggle('active', !isTx);
+  document.getElementById('home-tx').style.display = isTx ? 'block' : 'none';
+  document.getElementById('home-gr').style.display  = isTx ? 'none'  : 'block';
+}
+
+// ── FILTER CHIPS ── (handled in DOMContentLoaded)
+
+// ── SELL FLOW ──
+function startSell(type, name, sub, rate, imgSrc, imgSize) {
+  sellCard = { type, name, sub, rate, imgSrc, imgSize };
+  selectedDenom = 0;
+  document.getElementById('custom-amt').value = '';
+  const zone = document.getElementById('upload-zone');
+  zone.classList.remove('has-image');
+  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('upload-change-btn').style.display = 'none';
+  zone.querySelector('.upload-icon').style.display = 'flex';
+  zone.querySelector('h4').style.display = 'block';
+  zone.querySelector('p').style.display = 'block';
+  document.getElementById('upload-next-btn').disabled = true;
+  setHero('upload-hero', type, name, sub, rate, imgSrc, imgSize);
+  navigate('sell-upload');
+}
+
+function setHero(prefix, type, name, sub, rate, imgSrc, imgSize) {
+  const icon = document.getElementById(prefix + '-icon');
+  icon.className = 'card-icon-lg ' + type;
+  const img = document.getElementById(prefix + '-img');
+  img.src = imgSrc; img.style.width = imgSize; img.style.height = imgSize;
+  document.getElementById(prefix + '-name').textContent = name;
+  document.getElementById(prefix + '-sub').textContent  = sub;
+  document.getElementById(prefix + '-rate').textContent = '₦' + rate + '/$';
+}
+
+function handleImgUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const zone    = document.getElementById('upload-zone');
+    const preview = document.getElementById('upload-preview');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    document.getElementById('upload-change-btn').style.display = 'block';
+    zone.classList.add('has-image');
+    zone.querySelector('.upload-icon').style.display = 'none';
+    zone.querySelector('h4').style.display = 'none';
+    zone.querySelector('p').style.display  = 'none';
+    document.getElementById('upload-next-btn').disabled = false;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function goToStep2() {
+  const { type, name, sub, rate, imgSrc, imgSize } = sellCard;
+  setHero('denom-hero', type, name, sub, rate, imgSrc, imgSize);
+  const denominations = [10, 25, 50, 100, 150, 200, 250, 500];
+  const grid = document.getElementById('denom-grid');
+  grid.innerHTML = '';
+  denominations.forEach(d => {
+    const payout = Math.round(d * rate * 0.98);
+    const chip = document.createElement('div');
+    chip.className = 'denom-chip';
+    chip.innerHTML = `<div class="denom-val">$${d}</div><div class="denom-payout">≈₦${payout.toLocaleString()}</div>`;
+    chip.onclick = () => selectDenom(d, chip);
+    grid.appendChild(chip);
+  });
+  selectedDenom = 0;
+  document.getElementById('custom-amt').value = '';
+  document.getElementById('payout-preview').style.display = 'none';
+  document.getElementById('denom-next-btn').disabled = true;
+  navigate('sell-denom');
+}
+
+function selectDenom(val, el) {
+  document.getElementById('custom-amt').value = '';
+  document.querySelectorAll('.denom-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDenom = val;
+  updatePayout(val);
+}
+
+function onCustomAmount(val) {
+  document.querySelectorAll('.denom-chip').forEach(c => c.classList.remove('selected'));
+  selectedDenom = parseFloat(val) || 0;
+  if (selectedDenom > 0) updatePayout(selectedDenom);
+  else {
+    document.getElementById('payout-preview').style.display = 'none';
+    document.getElementById('denom-next-btn').disabled = true;
+  }
+}
+
+function updatePayout(amount) {
+  const rate  = sellCard.rate;
+  const gross = amount * rate;
+  const fee   = Math.round(gross * 0.02);
+  const net   = Math.round(gross - fee);
+  document.getElementById('p-card-val').textContent = '$' + amount;
+  document.getElementById('p-rate').textContent     = '₦' + rate + '/$';
+  document.getElementById('p-fee').textContent      = '−₦' + fee.toLocaleString();
+  document.getElementById('p-total').textContent    = '₦' + net.toLocaleString();
+  document.getElementById('payout-preview').style.display = 'block';
+  document.getElementById('denom-next-btn').disabled = false;
+}
+
+let txCount = 1001;
+function submitSell() {
+  const { type, name, sub, rate, imgSrc, imgSize } = sellCard;
+  const amount = selectedDenom;
+  const gross  = amount * rate;
+  const fee    = Math.round(gross * 0.02);
+  const net    = Math.round(gross - fee);
+  const ref    = '#CS' + (txCount++).toString();
+  const scIcon = document.getElementById('sc-icon');
+  scIcon.className = 'card-icon ' + type;
+  const scImg = document.getElementById('sc-img');
+  scImg.src = imgSrc; scImg.style.width = imgSize; scImg.style.height = imgSize;
+  document.getElementById('sc-name').textContent   = name;
+  document.getElementById('sc-sub').textContent    = sub;
+  document.getElementById('sc-ref').textContent    = ref;
+  document.getElementById('sc-payout').textContent = '₦' + net.toLocaleString();
+  document.getElementById('sc-val').textContent    = '$' + amount;
+  document.getElementById('sc-rate').textContent   = '₦' + rate + '/$';
+  document.getElementById('sc-fee').textContent    = '−₦' + fee.toLocaleString();
+  navigate('sell-success');
+  setTimeout(() => {
+    const check = document.querySelector('.success-checkmark');
+    if (check) { check.style.transition = 'stroke-dashoffset .5s ease'; check.style.strokeDashoffset = '0'; }
+  }, 300);
+}
+
+// ── WITHDRAWAL ──
+let wdAmount = 0, wdFee = 0, wdNet = 0, wdRef = 2001, selectedBankIdx = 0;
+const banks = [
+  { logo:'GT', name:'GTBank',     acct:'••4821', bg:'#e3f2fd', color:'#1565c0' },
+  { logo:'ZB', name:'Zenith Bank',acct:'••9034', bg:'#fff3e0', color:'#e65100' },
+  { logo:'OP', name:'Opay',       acct:'••2210', bg:'#e8f5e9', color:'#1b5e20' }
+];
+
+function openWithdraw() {
+  wdAmount = 0;
+  document.getElementById('wd-amount').value = '';
+  updateWdSummary(0);
+  document.getElementById('wd-next-btn').disabled = true;
+  document.querySelectorAll('.wd-quick-chip').forEach(c => c.classList.remove('sel'));
+  navigate('wd-amount');
+}
+
+function onWdAmount(val) {
+  document.querySelectorAll('.wd-quick-chip').forEach(c => c.classList.remove('sel'));
+  wdAmount = parseFloat(val) || 0;
+  updateWdSummary(wdAmount);
+}
+
+function setWdAmount(val) {
+  wdAmount = val;
+  document.getElementById('wd-amount').value = val;
+  document.querySelectorAll('.wd-quick-chip').forEach(c => c.classList.remove('sel'));
+  event.target.classList.add('sel');
+  updateWdSummary(val);
+}
+
+function updateWdSummary(amount) {
+  wdFee = Math.round(amount * 0.01);
+  wdNet = Math.round(amount - wdFee);
+  const fmt = n => '₦' + n.toLocaleString();
+  document.getElementById('wd-sum-amount').textContent = fmt(amount);
+  document.getElementById('wd-sum-fee').textContent    = '−' + fmt(wdFee);
+  document.getElementById('wd-sum-net').textContent    = fmt(wdNet);
+  document.getElementById('wd-next-btn').disabled = amount < 1000;
+}
+
+function selectBank(idx) {
+  selectedBankIdx = idx;
+  document.querySelectorAll('.wd-bank-item').forEach((el,i) => el.classList.toggle('selected', i === idx));
+}
+
+function goToWdConfirm() {
+  const bank = banks[selectedBankIdx];
+  const fmt  = n => '₦' + n.toLocaleString();
+  const now  = new Date();
+  const dateStr = now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' · ' +
+    now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('wd-conf-amount').textContent = fmt(wdAmount);
+  document.getElementById('wd-conf-net').textContent    = 'You receive: ' + fmt(wdNet);
+  document.getElementById('wd-conf-fee').textContent    = '−' + fmt(wdFee);
+  document.getElementById('wd-conf-date').textContent   = dateStr;
+  const logo = document.getElementById('wd-conf-bank-logo');
+  logo.textContent = bank.logo; logo.style.background = bank.bg; logo.style.color = bank.color;
+  document.getElementById('wd-conf-bank-name').textContent = bank.name + ' · ' + bank.acct;
+  pinCode = ''; updatePinDots();
+  navigate('wd-confirm');
+}
+
+let pinCode = '';
+function pinInput(digit) {
+  if (pinCode.length >= 4) return;
+  pinCode += digit;
+  updatePinDots();
+  if (pinCode.length === 4) setTimeout(submitWithdrawal, 400);
+}
+function pinDelete() { pinCode = pinCode.slice(0,-1); updatePinDots(); }
+function updatePinDots() {
+  for (let i = 0; i < 4; i++)
+    document.getElementById('pd'+i).classList.toggle('filled', i < pinCode.length);
+}
+
+function submitWithdrawal() {
+  const bank    = banks[selectedBankIdx];
+  const fmt     = n => '₦' + n.toLocaleString();
+  const now     = new Date();
+  const dateStr = now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' · ' +
+    now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const ref = '#WD' + (wdRef++).toString();
+  document.getElementById('wds-amount').textContent = fmt(wdAmount);
+  document.getElementById('wds-bank').textContent   = bank.name + ' · ' + bank.acct;
+  document.getElementById('wds-ref').textContent    = ref;
+  document.getElementById('wds-fee').textContent    = fmt(wdFee);
+  document.getElementById('wds-net').textContent    = fmt(wdNet);
+  document.getElementById('wds-date').textContent   = dateStr;
+  document.getElementById('wds-t1').textContent     = 'Just now';
+  navigate('wd-success');
+  setTimeout(() => {
+    const c = document.getElementById('wd-checkmark');
+    if (c) { c.style.transition = 'stroke-dashoffset .5s ease'; c.style.strokeDashoffset = '0'; }
+  }, 300);
+}
+
+// ── TRANSACTIONS DATA ──
+const TRANSACTIONS = [
+  {
+    id: '#CS1842', type: 'card-sale', name: 'iTunes / Apple', sub: 'USA Physical · $50 card',
+    date: 'Feb 18, 2026 · 14:32', amount: '+₦37,500', credit: true, status: 'completed',
+    heroColor: '#111', typeLabel: 'Card Sale',
+    iconSvg: '<img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" style="width:26px;height:26px;object-fit:contain;">',
+    details: [
+      { label:'Card Type',    value:'iTunes / Apple' },
+      { label:'Denomination', value:'$50 USD' },
+      { label:'Rate Applied', value:'₦750/$' },
+      { label:'Gross Amount', value:'₦37,500' },
+      { label:'Platform Fee', value:'−₦750' },
+      { label:'Net Payout',   value:'₦36,750' },
+    ]
+  },
+  {
+    id: '#CS1831', type: 'card-sale', name: 'Amazon USA', sub: 'USA E-code · $25 card',
+    date: 'Feb 17, 2026 · 09:15', amount: '+₦17,000', credit: true, status: 'completed',
+    heroColor: '#111', typeLabel: 'Card Sale',
+    iconSvg: '<img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" style="width:32px;height:26px;object-fit:contain;">',
+    details: [
+      { label:'Card Type',    value:'Amazon Gift Card' },
+      { label:'Denomination', value:'$25 USD' },
+      { label:'Rate Applied', value:'₦680/$' },
+      { label:'Gross Amount', value:'₦17,000' },
+      { label:'Platform Fee', value:'−₦340' },
+      { label:'Net Payout',   value:'₦16,660' },
+    ]
+  },
+  {
+    id: '#CS1820', type: 'card-sale', name: 'Google Play', sub: 'USA Physical · $100 card',
+    date: 'Feb 16, 2026 · 17:44', amount: '+₦62,000', credit: true, status: 'pending',
+    heroColor: '#111', typeLabel: 'Card Sale',
+    iconSvg: '<img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" style="width:36px;height:26px;object-fit:contain;">',
+    details: [
+      { label:'Card Type',    value:'Google Play' },
+      { label:'Denomination', value:'$100 USD' },
+      { label:'Rate Applied', value:'₦620/$' },
+      { label:'Gross Amount', value:'₦62,000' },
+      { label:'Platform Fee', value:'−₦1,240' },
+      { label:'Est. Payout',  value:'₦60,760' },
+    ]
+  },
+  {
+    id: '#WD1811', type: 'withdrawal', name: 'Withdrawal', sub: 'GTBank · ••4821',
+    date: 'Feb 15, 2026 · 11:05', amount: '−₦50,000', credit: false, status: 'completed',
+    heroColor: '#111', typeLabel: 'Withdrawal',
+    iconSvg: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+    details: [
+      { label:'Bank',         value:'GTBank' },
+      { label:'Account',      value:'•••• •••• 4821' },
+      { label:'Amount',       value:'₦50,000' },
+      { label:'Transfer Fee', value:'−₦500' },
+      { label:'Amount Sent',  value:'₦49,500' },
+    ]
+  },
+  {
+    id: '#CS1799', type: 'card-sale', name: 'Steam Wallet', sub: 'Global · $50 card',
+    date: 'Feb 14, 2026 · 20:18', amount: '₦0', credit: false, status: 'failed',
+    heroColor: '#111', typeLabel: 'Card Sale (Failed)',
+    iconSvg: '<img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" style="width:26px;height:26px;object-fit:contain;">',
+    details: [
+      { label:'Card Type',      value:'Steam Wallet' },
+      { label:'Denomination',   value:'$50 USD' },
+      { label:'Rate Applied',   value:'₦580/$' },
+      { label:'Failure Reason', value:'Invalid card' },
+      { label:'Amount',         value:'₦0 (refunded)' },
+    ]
+  }
+];
+
+// ── RENDER TRANSACTION LIST ──
+function renderTxList() {
+  const container = document.getElementById('tx-list-container');
+  if (!container) return;
+  container.innerHTML = '';
+  TRANSACTIONS.forEach((tx, idx) => {
+    const statusColor = tx.status === 'completed' ? '#00b140' : tx.status === 'pending' ? '#f57c00' : '#e53935';
+    const iconBg      = tx.status === 'completed' ? '#e8f5e9' : tx.status === 'pending' ? '#fff8e1' : '#fce4ec';
+    const checkSvg    = tx.status === 'completed'
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${statusColor}" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`
+      : tx.status === 'pending'
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${statusColor}" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${statusColor}" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+    const amtColor = tx.credit ? '#00b140' : tx.status === 'failed' ? '#e53935' : '#111';
+    const el = document.createElement('div');
+    el.style.cssText = 'display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background .15s;';
+    el.onmouseenter = () => el.style.background = '#f5f5f5';
+    el.onmouseleave = () => el.style.background = 'transparent';
+    el.innerHTML = `
+      <div style="width:44px;height:44px;border-radius:12px;background:${iconBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">${checkSvg}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${tx.name}</div>
+        <div style="font-size:11px;color:#aaa;margin-top:2px;">${tx.date}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:14px;font-weight:700;color:${amtColor};">${tx.amount}</div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px;text-transform:capitalize;">${tx.status}</div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+    `;
+    el.onclick = () => openReceipt(idx);
+    container.appendChild(el);
+  });
+}
+
+// ── OPEN RECEIPT ──
+function openReceipt(idx) {
+  const tx = TRANSACTIONS[idx];
+  document.getElementById('rcpt-back-btn').onclick = () => { navigate('home'); switchTab('tx'); };
+  const hero = document.getElementById('rcpt-hero');
+  hero.style.background = tx.heroColor;
+  const typeIcon = document.getElementById('rcpt-type-icon');
+  typeIcon.style.background = 'rgba(255,255,255,0.15)';
+  typeIcon.innerHTML = tx.iconSvg;
+  document.getElementById('rcpt-amount').textContent = tx.amount;
+  document.getElementById('rcpt-title').textContent  = tx.name;
+  const pill = document.getElementById('rcpt-status-pill');
+  pill.className = 'rcpt-status-pill ' + tx.status;
+  const dot = tx.status === 'completed' ? '✓' : tx.status === 'pending' ? '◷' : '✕';
+  pill.textContent = dot + ' ' + tx.status.charAt(0).toUpperCase() + tx.status.slice(1);
+  document.getElementById('rcpt-ref').textContent        = tx.id;
+  document.getElementById('rcpt-date').textContent       = tx.date;
+  document.getElementById('rcpt-type-label').textContent = tx.typeLabel;
+  const detailCard = document.getElementById('rcpt-detail-card');
+  detailCard.innerHTML = tx.details.map(d =>
+    `<div class="rcpt-row"><span class="rcpt-row-label">${d.label}</span><span class="rcpt-row-value">${d.value}</span></div>`
+  ).join('');
+  window._currentTxIdx = idx;
+  navigate('tx-receipt');
+}
+
+// ── DOWNLOAD RECEIPT ──
+async function downloadReceipt() {
+  const btn = document.getElementById('rcpt-download-btn');
+  const origHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Generating...';
+  try {
+    const el = document.getElementById('receipt-capture');
+    const canvas = await html2canvas(el, { backgroundColor: '#f7f7f7', scale: 3, useCORS: true, logging: false });
+    const link = document.createElement('a');
+    const tx = TRANSACTIONS[window._currentTxIdx || 0];
+    link.download = 'receipt-' + tx.id.replace('#','') + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch(e) {
+    console.error(e);
+    alert('Could not generate image. Please try again.');
+  }
+  btn.disabled = false;
+  btn.innerHTML = origHTML;
+}
+
+
+// ══════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════
+
+const NOTIFS = [
+  { id:1, cat:'transactions', unread:true,  icon:'sale',    title:'Card Trade Approved ✅',     body:'Your iTunes $50 card has been verified. ₦36,750 has been credited to your wallet.',    time:'2 min ago' },
+  { id:2, cat:'transactions', unread:true,  icon:'pending', title:'Card Under Review ⏳',        body:'Your Google Play $100 card is being reviewed. We will notify you once it is confirmed.', time:'1 hr ago' },
+  { id:3, cat:'transactions', unread:true,  icon:'money',   title:'Withdrawal Successful 💸',    body:'₦49,500 has been sent to your GTBank account ending in 4821.',                         time:'Yesterday' },
+  { id:4, cat:'promotions',   unread:false, icon:'promo',   title:'🔥 Rates Increased Today!',   body:'iTunes cards now trading at ₦750/$ — highest this month! Sell now before rates drop.', time:'2 days ago' },
+  { id:5, cat:'account',      unread:false, icon:'kyc',     title:'Complete Your KYC',           body:'Verify your identity to unlock higher trading limits and faster withdrawals.',           time:'3 days ago' },
+  { id:6, cat:'promotions',   unread:false, icon:'promo',   title:'Refer & Earn ₦2,000 🎁',     body:'Invite friends to CardSwap and earn ₦2,000 for every friend who completes their first trade.', time:'5 days ago' },
+  { id:7, cat:'transactions', unread:false, icon:'failed',  title:'Trade Declined ❌',           body:'Your Steam $50 card was declined — invalid card. Please contact support if you think this is an error.', time:'1 week ago' },
+  { id:8, cat:'account',      unread:false, icon:'security',title:'New Login Detected 🔐',       body:'A new login was detected on your account from Lagos, NG. Tap to review.',               time:'1 week ago' },
+];
+
+let activeNotifFilter = 'all';
+
+function getNotifIconHTML(icon) {
+  const icons = {
+    sale:     { bg:'#e8f5e9', svg:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>` },
+    pending:  { bg:'#fff8e1', svg:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f57c00" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>` },
+    money:    { bg:'#e8f5e9', svg:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>` },
+    promo:    { bg:'#fff3e0', svg:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f57c00" stroke-width="2.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` },
+    kyc:      { bg:'#f3e5f5', svg:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7b1fa2" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>` },
+    failed:   { bg:'#fce4ec', svg:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` },
+    security: { bg:'#e3f2fd', svg:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1565c0" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>` },
+  };
+  const d = icons[icon] || icons.sale;
+  return `<div class="notif-icon" style="background:${d.bg};">${d.svg}</div>`;
+}
+
+function renderNotifList() {
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+  const filtered = activeNotifFilter === 'all' ? NOTIFS : NOTIFS.filter(n => n.cat === activeNotifFilter);
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="notif-empty"><div class="notif-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><p>No notifications here yet</p></div>`;
+    return;
+  }
+  // Group by recency
+  const todayItems    = filtered.filter(n => ['2 min ago','1 hr ago'].includes(n.time));
+  const recentItems   = filtered.filter(n => ['Yesterday','2 days ago','3 days ago'].includes(n.time));
+  const olderItems    = filtered.filter(n => ['5 days ago','1 week ago'].includes(n.time));
+
+  let html = '';
+  function renderGroup(label, items) {
+    if (!items.length) return '';
+    return `<div class="notif-group-label">${label}</div>` +
+      items.map(n => `
+        <div class="notif-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
+          ${getNotifIconHTML(n.icon)}
+          <div class="notif-content">
+            <div class="notif-title">${n.title}</div>
+            <div class="notif-body">${n.body}</div>
+            <div class="notif-time">${n.time}</div>
+          </div>
+          ${n.unread ? '<div class="notif-unread-dot"></div>' : ''}
+        </div>`).join('');
+  }
+  html += renderGroup('Today', todayItems);
+  html += renderGroup('This Week', recentItems);
+  html += renderGroup('Earlier', olderItems);
+  list.innerHTML = html;
+
+  // Update badge
+  const unreadCount = NOTIFS.filter(n => n.unread).length;
+  const badge = document.getElementById('notif-badge');
+  if (badge) badge.style.display = unreadCount > 0 ? 'block' : 'none';
+}
+
+function filterNotifs(cat, el) {
+  activeNotifFilter = cat;
+  el.closest('.notif-filter-row').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderNotifList();
+}
+
+function markRead(id) {
+  const n = NOTIFS.find(x => x.id === id);
+  if (n) { n.unread = false; renderNotifList(); }
+}
+
+function markAllRead() {
+  NOTIFS.forEach(n => n.unread = false);
+  renderNotifList();
+}
+
+// ══════════════════════════════════════
+// SUPPORT / FAQ / CHAT
+// ══════════════════════════════════════
+
+function toggleFaq(headerEl) {
+  const chevron = headerEl.querySelector('.support-faq-chevron');
+  const answer  = headerEl.nextElementSibling;
+  const isOpen  = answer.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.support-faq-a').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.support-faq-chevron').forEach(c => c.classList.remove('open'));
+  // Open this one if it was closed
+  if (!isOpen) {
+    answer.classList.add('open');
+    chevron.classList.add('open');
+  }
+}
+
+const chatReplies = [
+  "Thanks for reaching out! Can you provide more details so I can help you better?",
+  "I understand. Let me look into that for you right away.",
+  "Great question! Our team processes card trades within 5–15 minutes on average.",
+  "I've noted your concern. A senior agent will follow up within the hour.",
+  "Is there anything else I can help you with today?"
+];
+let chatReplyIndex = 0;
+
+function openChat() {
+  const panel = document.getElementById('chat-panel');
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+function closeChat() {
+  document.getElementById('chat-panel').style.display = 'none';
+}
+
+function sendChatMsg() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const container = document.getElementById('chat-messages');
+
+  // User message
+  const userDiv = document.createElement('div');
+  userDiv.style.cssText = 'align-self:flex-end;max-width:80%;';
+  userDiv.innerHTML = `
+    <div style="background:#111;border-radius:16px 4px 16px 16px;padding:10px 14px;font-size:13px;color:white;line-height:1.5;">${msg}</div>
+    <div style="font-size:10px;color:#bbb;margin-top:4px;padding-right:4px;text-align:right;">You · just now</div>
+  `;
+  container.appendChild(userDiv);
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+
+  // Agent typing indicator then reply
+  const typingDiv = document.createElement('div');
+  typingDiv.style.cssText = 'align-self:flex-start;max-width:80%;';
+  typingDiv.innerHTML = `<div style="background:#f5f5f5;border-radius:4px 16px 16px 16px;padding:10px 14px;font-size:13px;color:#aaa;">typing...</div>`;
+  container.appendChild(typingDiv);
+  container.scrollTop = container.scrollHeight;
+
+  setTimeout(() => {
+    const reply = chatReplies[chatReplyIndex % chatReplies.length];
+    chatReplyIndex++;
+    typingDiv.innerHTML = `
+      <div style="background:#f5f5f5;border-radius:4px 16px 16px 16px;padding:10px 14px;font-size:13px;color:#111;line-height:1.5;">${reply}</div>
+      <div style="font-size:10px;color:#bbb;margin-top:4px;padding-left:4px;">Support · just now</div>
+    `;
+    container.scrollTop = container.scrollHeight;
+  }, 1200);
+}
+
+
+// ══════════════════════════════════════
+// SETTINGS SUB-PAGES
+// ══════════════════════════════════════
+
+// Toast notification
+function showSavedToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg || 'Changes saved!';
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2200);
+}
+
+// Add bank sheet toggle
+function showAddBankSheet() {
+  const s = document.getElementById('add-bank-sheet');
+  s.style.display = s.style.display === 'none' ? 'block' : 'none';
+  if (s.style.display === 'block') s.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Language selection
+let selectedLang = 'English';
+function selectLang(lang, el) {
+  selectedLang = lang;
+  document.querySelectorAll('.lang-item .lang-check').forEach(c => c.remove());
+  const check = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  check.setAttribute('class', 'lang-check');
+  check.setAttribute('width', '16'); check.setAttribute('height', '16');
+  check.setAttribute('viewBox', '0 0 24 24'); check.setAttribute('fill', 'none');
+  check.setAttribute('stroke', 'currentColor'); check.setAttribute('stroke-width', '2.5');
+  check.setAttribute('stroke-linecap', 'round');
+  const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  poly.setAttribute('points', '20 6 9 17 4 12');
+  check.appendChild(poly);
+  el.appendChild(check);
+  const disp = document.getElementById('lang-display');
+  if (disp) disp.textContent = lang + ' ›';
+  setTimeout(() => { navigate('settings'); showSavedToast('Language updated to ' + lang); }, 300);
+}
+
+// Change PIN flow
+let spStep = 1; // 1=current, 2=new, 3=confirm
+let spCurrent = '', spNew = '', spConfirm = '';
+let spCurrentEntry = '', spNewEntry = '', spConfirmEntry = '';
+
+const spLabels = ['', 'Enter your current PIN', 'Enter your new PIN', 'Confirm your new PIN'];
+const spProgIds = ['pin-prog-1', 'pin-prog-2', 'pin-prog-3'];
+
+function spInput(digit) {
+  let entry = spStep === 1 ? spCurrentEntry : spStep === 2 ? spNewEntry : spConfirmEntry;
+  if (entry.length >= 4) return;
+  entry += digit;
+  if (spStep === 1) spCurrentEntry = entry;
+  else if (spStep === 2) spNewEntry = entry;
+  else spConfirmEntry = entry;
+  updateSpDots(entry.length);
+  if (entry.length === 4) setTimeout(spAdvance, 350);
+}
+
+function spDelete() {
+  if (spStep === 1) spCurrentEntry = spCurrentEntry.slice(0, -1);
+  else if (spStep === 2) spNewEntry = spNewEntry.slice(0, -1);
+  else spConfirmEntry = spConfirmEntry.slice(0, -1);
+  const entry = spStep === 1 ? spCurrentEntry : spStep === 2 ? spNewEntry : spConfirmEntry;
+  updateSpDots(entry.length);
+}
+
+function updateSpDots(count, shake) {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('sp' + i);
+    d.className = 'pin-step-dot' + (i < count ? ' filled' : '') + (shake && i < count ? ' error' : '');
+  }
+}
+
+function spAdvance() {
+  if (spStep === 1) {
+    // Accept any current PIN (demo — real app would verify)
+    spStep = 2; spNewEntry = '';
+    updateSpDots(0);
+    document.getElementById('pin-step-label').textContent = spLabels[2];
+    document.getElementById('pin-prog-2').style.background = '#111';
+    document.getElementById('pin-page-title').textContent = 'New PIN';
+  } else if (spStep === 2) {
+    spStep = 3; spConfirmEntry = '';
+    updateSpDots(0);
+    document.getElementById('pin-step-label').textContent = spLabels[3];
+    document.getElementById('pin-prog-3').style.background = '#111';
+    document.getElementById('pin-page-title').textContent = 'Confirm PIN';
+  } else if (spStep === 3) {
+    if (spNewEntry === spConfirmEntry) {
+      // Success
+      document.querySelector('#page-settings-pin .pin-step-numpad').style.display = 'none';
+      document.querySelector('#page-settings-pin .pin-step-title').style.display = 'none';
+      document.getElementById('pin-dots-row').style.display = 'none';
+      document.querySelector('#page-settings-pin > div:nth-child(3)').style.display = 'none'; // progress bar
+      document.getElementById('pin-success').style.display = 'flex';
+    } else {
+      // Mismatch - shake and reset step 3
+      updateSpDots(4, true);
+      setTimeout(() => {
+        spConfirmEntry = '';
+        updateSpDots(0);
+        document.getElementById('pin-step-label').textContent = 'PINs do not match. Try again.';
+        document.getElementById('pin-step-label').style.color = '#e53935';
+        setTimeout(() => {
+          document.getElementById('pin-step-label').style.color = '';
+          document.getElementById('pin-step-label').textContent = spLabels[3];
+        }, 2000);
+      }, 500);
+    }
+  }
+}
+
+function resetPinFlow() {
+  spStep = 1; spCurrentEntry = ''; spNewEntry = ''; spConfirmEntry = '';
+  document.getElementById('pin-step-label').textContent = spLabels[1];
+  document.getElementById('pin-step-label').style.color = '';
+  document.getElementById('pin-page-title').textContent = 'Change PIN';
+  updateSpDots(0);
+  spProgIds.forEach((id, i) => {
+    document.getElementById(id).style.background = i === 0 ? '#111' : '#eee';
+  });
+  const numpad = document.querySelector('#page-settings-pin .pin-step-numpad');
+  const label  = document.querySelector('#page-settings-pin .pin-step-title');
+  const dotsRow = document.getElementById('pin-dots-row');
+  const prog   = document.querySelector('#page-settings-pin > div:nth-child(3)');
+  if (numpad) numpad.style.display = 'grid';
+  if (label)  label.style.display = 'block';
+  if (dotsRow) dotsRow.style.display = 'flex';
+  if (prog)   prog.style.display = 'flex';
+  document.getElementById('pin-success').style.display = 'none';
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', function() {
+  const _spin = document.createElement('style');
+  _spin.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+  document.head.appendChild(_spin);
+  tick(); 
+  setInterval(tick, 1000);
+  document.querySelectorAll('.filter-row').forEach(row => {
+    row.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.onclick = () => {
+        row.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      };
+    });
+  });
+  renderTxList();
+});
+
+</script>
+</body>
+</html>
