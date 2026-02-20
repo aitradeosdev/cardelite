@@ -10,7 +10,7 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:'DM Sans',sans-serif; background:#f7f7f7; transition:background .3s; min-height:100vh; }
 body.dark-mode { background:#0f0f0f; }
-.phone { width:100%; max-width:100%; height:100vh; background:#f7f7f7; overflow:hidden; display:flex; flex-direction:column; transition:background .3s; }
+.phone { width:100%; max-width:100%; height:100dvh; background:#f7f7f7; overflow:hidden; display:flex; flex-direction:column; transition:background .3s; }
 body.dark-mode .phone { background:#0f0f0f; }
 body.dark-mode .page { background:#0f0f0f; }
 
@@ -1604,13 +1604,6 @@ body.dark-mode .otp-resend a:hover { text-decoration-color:#fff; }
 
 <script>
 
-// ── CLOCK ──
-function tick() {
-  const n = new Date();
-  document.getElementById('clock').textContent =
-    n.getHours().toString().padStart(2,'0') + ':' + n.getMinutes().toString().padStart(2,'0');
-}
-
 // ── STATE ──
 const FLOW_PAGES = ['sell-upload','sell-denom','sell-success'];
 const NAV_PAGES  = ['home','sell','rates','settings'];
@@ -2632,9 +2625,6 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     navigate('onboard');
   }
-  
-  tick(); 
-  setInterval(tick, 1000);
   document.querySelectorAll('.filter-row:not(#country-filter-row)').forEach(row => {
     row.querySelectorAll('.filter-chip').forEach(chip => {
       chip.onclick = () => {
