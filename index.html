@@ -8,13 +8,107 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-.phone { width:390px; height:844px; background:#f7f7f7; border-radius:40px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.28); display:flex; flex-direction:column; }
+body { font-family:'DM Sans',sans-serif; background:#f7f7f7; transition:background .3s; min-height:100vh; }
+body.dark-mode { background:#0f0f0f; }
+.phone { width:100%; max-width:100%; height:100vh; background:#f7f7f7; overflow:hidden; display:flex; flex-direction:column; transition:background .3s; }
+body.dark-mode .phone { background:#0f0f0f; }
+body.dark-mode .page { background:#0f0f0f; }
+
+body.dark-mode .page-header { background:#0f0f0f; }
+body.dark-mode .sub-header { background:#0f0f0f; }
+body.dark-mode .page-title-header { background:#0f0f0f; }
+body.dark-mode .user-name, body.dark-mode .sub-header h3, body.dark-mode .page-title-header h2 { color:#fff; }
+body.dark-mode .welcome-text, body.dark-mode .page-title-header p { color:#888; }
+body.dark-mode .icon-btn, body.dark-mode .back-btn { background:#1a1a1a; border-color:#2a2a2a; }
+body.dark-mode .icon-btn svg, body.dark-mode .back-btn svg { stroke:#fff !important; }
+body.dark-mode .bottom-nav { background:#1a1a1a; border-color:#2a2a2a; }
+body.dark-mode .nav-label { color:#666; }
+body.dark-mode .nav-item.active .nav-label { color:#fff; }
+body.dark-mode .nav-item.active .nav-icon { background:#fff; }
+body.dark-mode .nav-item.active .nav-icon svg { stroke:#111 !important; }
+body.dark-mode .hot-rates-carousel, body.dark-mode .sell-search, body.dark-mode .rate-search { background:#1a1a1a; border:1px solid #2a2a2a; }
+body.dark-mode .tabs { background:#1a1a1a; }
+body.dark-mode .tab { color:#666; }
+body.dark-mode .tab.active { background:#fff; color:#111; }
+body.dark-mode .card-item, body.dark-mode .tx-item, body.dark-mode .rate-card-item { border-bottom-color:#2a2a2a; }
+body.dark-mode .card-name, body.dark-mode .tx-name, body.dark-mode .rate-name, body.dark-mode .rate-value { color:#fff; }
+body.dark-mode .sell-card-item, body.dark-mode .denom-chip, body.dark-mode .custom-amount-wrap, body.dark-mode .denom-payout-preview, body.dark-mode .success-card, body.dark-mode .rates-stat, body.dark-mode .settings-group, body.dark-mode .wd-bank-item, body.dark-mode .wd-fee-box, body.dark-mode .wd-confirm-details, body.dark-mode .wd-receipt, body.dark-mode .wd-timeline, body.dark-mode .rcpt-card, body.dark-mode .settings-form-wrap, body.dark-mode .bank-card, body.dark-mode .support-faq-item, body.dark-mode .support-channel, body.dark-mode .notif-item { background:#1a1a1a; border-color:#2a2a2a; }
+body.dark-mode .sell-card-name, body.dark-mode .sell-card-rate, body.dark-mode .denom-val, body.dark-mode .payout-value, body.dark-mode .payout-total-label, body.dark-mode .success-row-value, body.dark-mode .stat-value, body.dark-mode .settings-item-label, body.dark-mode .wd-bank-name, body.dark-mode .wd-fee-value, body.dark-mode .wd-fee-total-label, body.dark-mode .wd-confirm-label, body.dark-mode .wd-confirm-value, body.dark-mode .wd-receipt-amount, body.dark-mode .wd-receipt-value, body.dark-mode .wd-tl-title, body.dark-mode .rcpt-row-value, body.dark-mode .settings-form-input, body.dark-mode .settings-form-static, body.dark-mode .bank-card-name, body.dark-mode .support-faq-q span, body.dark-mode .support-channel-name, body.dark-mode .notif-title { color:#fff; }
+body.dark-mode .sell-card-sub, body.dark-mode .denom-payout, body.dark-mode .payout-label, body.dark-mode .success-row-label, body.dark-mode .stat-label, body.dark-mode .wd-bank-acct, body.dark-mode .wd-fee-label, body.dark-mode .wd-receipt-label, body.dark-mode .wd-tl-time, body.dark-mode .rcpt-row-label, body.dark-mode .settings-form-label, body.dark-mode .bank-card-acct, body.dark-mode .support-channel-sub, body.dark-mode .notif-body { color:#888; }
+body.dark-mode .denom-chip.selected { background:#fff; border-color:#fff; }
+body.dark-mode .denom-chip.selected .denom-val { color:#111; }
+body.dark-mode .denom-chip.selected .denom-payout { color:#666; }
+body.dark-mode .filter-chip { background:#1a1a1a; border-color:#2a2a2a; color:#888; }
+body.dark-mode .filter-chip.active { background:#fff; color:#111; border-color:#fff; }
+body.dark-mode .sell-btn-sm, body.dark-mode .flow-next-btn, body.dark-mode .btn-sell-another, body.dark-mode .settings-save-btn, body.dark-mode .support-chat-btn, body.dark-mode .rcpt-download-btn { background:#fff; color:#111; }
+body.dark-mode .btn-home, body.dark-mode .rcpt-share-btn { background:#1a1a1a; color:#fff; border-color:#2a2a2a; }
+body.dark-mode .upload-zone, body.dark-mode .code-input-wrap, body.dark-mode .wd-amount-wrap { background:#1a1a1a; border-color:#2a2a2a; }
+body.dark-mode .code-input, body.dark-mode .custom-amount-input, body.dark-mode .wd-amount-input, body.dark-mode .calc-amount { color:#fff; }
+body.dark-mode .settings-info-box { background:#1a1a1a; border:1px solid #2a2a2a; }
+body.dark-mode .wd-quick-chip { background:#1a1a1a; border-color:#2a2a2a; color:#fff; }
+body.dark-mode .wd-quick-chip.sel { background:#fff; color:#111; border-color:#fff; }
+body.dark-mode .wd-num-btn, body.dark-mode .pin-step-num { background:#1a1a1a; color:#fff; }
+body.dark-mode .wd-num-btn.del, body.dark-mode .pin-step-num.del { background:#2a2a2a; }
+body.dark-mode .settings-item-icon { opacity:.9; }
+body.dark-mode .profile-card { background:#1a1a1a; }
+body.dark-mode .avatar, body.dark-mode .profile-avatar, body.dark-mode .avatar-lg { background:#2a2a2a; }
+body.dark-mode .hot-rate-item { background:#2a2a2a; }
+body.dark-mode .hot-rate-name { color:#fff; }
+body.dark-mode .card-icon { opacity:.95; }
+body.dark-mode .notif-item.unread { background:#1a1a1a; }
+body.dark-mode .lang-item { background:transparent; border-bottom-color:#2a2a2a; }
+body.dark-mode .lang-name { color:#fff; }
+body.dark-mode .auth-content::before { background:radial-gradient(circle, rgba(0,230,118,.06) 0%, transparent 70%); }
+body.dark-mode .auth-content::after { background:radial-gradient(circle, rgba(255,255,255,.03) 0%, transparent 70%); }
+body.dark-mode .auth-logo { background:linear-gradient(135deg, #fff 0%, #e0e0e0 100%); color:#111; }
+body.dark-mode .auth-title { color:#fff; }
+body.dark-mode .auth-subtitle { color:#888; }
+body.dark-mode .auth-input { background:#1a1a1a; border-color:#2a2a2a; color:#fff; }
+body.dark-mode .auth-input:focus { border-color:#fff; box-shadow:0 0 0 4px rgba(255,255,255,.05); }
+body.dark-mode .auth-btn { background:linear-gradient(135deg, #fff 0%, #e0e0e0 100%); color:#111; }
+body.dark-mode .auth-link { color:#888; }
+body.dark-mode .auth-link a { color:#fff; }
+body.dark-mode .auth-link a:hover { text-decoration-color:#fff; }
+body.dark-mode .otp-input { background:#1a1a1a; border-color:#2a2a2a; color:#fff; }
+body.dark-mode .otp-input:focus { border-color:#fff; box-shadow:0 0 0 4px rgba(255,255,255,.05); }
+body.dark-mode .otp-resend a { color:#fff; }
+body.dark-mode .otp-resend a:hover { text-decoration-color:#fff; }
+
+/* ONBOARDING & AUTH */
+.onboard-slide { position:absolute; inset:0; opacity:0; pointer-events:none; transition:opacity .4s; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 30px; }
+.onboard-slide.active { opacity:1; pointer-events:all; }
+.onboard-img { width:200px; height:200px; border-radius:30px; background:#f0f0f0; display:flex; align-items:center; justify-content:center; margin-bottom:30px; font-size:70px; }
+.onboard-title { font-size:24px; font-weight:700; color:#111; margin-bottom:10px; text-align:center; }
+.onboard-desc { font-size:14px; color:#666; text-align:center; line-height:1.6; max-width:300px; }
+.onboard-footer { position:absolute; bottom:40px; left:0; right:0; display:flex; flex-direction:column; align-items:center; }
+.onboard-dots { display:flex; gap:8px; margin-bottom:24px; }
+.onboard-dot { width:8px; height:8px; border-radius:50%; background:#ddd; transition:all .3s; }
+.onboard-dot.active { width:24px; border-radius:4px; background:#111; }
+.onboard-btn { width:280px; background:#111; color:#fff; border:none; border-radius:12px; padding:14px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:10px; }
+.onboard-skip { background:transparent; color:#888; }
+.auth-content { display:flex; flex-direction:column; align-items:center; padding:50px 30px; position:relative; overflow:hidden; }
+.auth-content::before { content:''; position:absolute; top:-100px; right:-100px; width:300px; height:300px; background:radial-gradient(circle, rgba(0,177,64,.08) 0%, transparent 70%); border-radius:50%; pointer-events:none; }
+.auth-content::after { content:''; position:absolute; bottom:-80px; left:-80px; width:250px; height:250px; background:radial-gradient(circle, rgba(17,17,17,.05) 0%, transparent 70%); border-radius:50%; pointer-events:none; }
+.auth-logo { width:80px; height:80px; background:linear-gradient(135deg, #111 0%, #2a2a2a 100%); border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; color:#fff; margin-bottom:24px; box-shadow:0 8px 24px rgba(0,0,0,.15); position:relative; z-index:1; }
+.auth-title { font-size:26px; font-weight:700; color:#111; margin-bottom:8px; position:relative; z-index:1; }
+.auth-subtitle { font-size:14px; color:#888; margin-bottom:36px; text-align:center; line-height:1.5; position:relative; z-index:1; }
+.auth-form { width:100%; max-width:320px; position:relative; z-index:1; }
+.auth-input { width:100%; border:2px solid #eee; border-radius:14px; padding:15px 18px; font-family:'DM Sans',sans-serif; font-size:14px; margin-bottom:14px; outline:none; transition:all .2s; background:white; }
+.auth-input:focus { border-color:#111; box-shadow:0 0 0 4px rgba(0,0,0,.05); }
+.auth-btn { width:100%; background:linear-gradient(135deg, #111 0%, #2a2a2a 100%); color:#fff; border:none; border-radius:14px; padding:16px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:20px; box-shadow:0 4px 16px rgba(0,0,0,.2); transition:all .2s; }
+.auth-btn:active { transform:scale(.98); box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.auth-link { text-align:center; font-size:13px; color:#888; }
+.auth-link a { color:#111; font-weight:600; cursor:pointer; text-decoration:underline; text-decoration-color:transparent; transition:text-decoration-color .2s; }
+.auth-link a:hover { text-decoration-color:#111; }
+.otp-inputs { display:flex; gap:12px; justify-content:center; margin-bottom:28px; }
+.otp-input { width:56px; height:56px; border:2px solid #eee; border-radius:14px; text-align:center; font-size:24px; font-weight:700; font-family:'DM Sans',sans-serif; outline:none; transition:all .2s; background:white; }
+.otp-input:focus { border-color:#111; box-shadow:0 0 0 4px rgba(0,0,0,.05); transform:scale(1.05); }
+.otp-resend { text-align:center; font-size:13px; color:#888; margin-bottom:28px; }
+.otp-resend a { color:#111; font-weight:600; cursor:pointer; text-decoration:underline; text-decoration-color:transparent; transition:text-decoration-color .2s; }
+.otp-resend a:hover { text-decoration-color:#111; }
 
 /* STATUS BAR */
-.status-bar { display:flex; justify-content:space-between; align-items:center; padding:14px 24px 8px; background:#f7f7f7; flex-shrink:0; }
-.status-bar .time { font-size:15px; font-weight:600; }
-.status-icons { display:flex; align-items:center; gap:6px; }
+.status-bar { display:none; }
 
 /* PAGES */
 .pages-wrapper { flex:1; overflow:hidden; position:relative; }
@@ -59,12 +153,15 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
 .sold-label { display:flex; align-items:center; gap:6px; font-size:12px; color:#aaa; }
 .sold-amount { color:#00e676; font-size:13px; font-weight:600; }
 .dots { display:flex; justify-content:center; gap:6px; margin:14px 0; }
-.kyc-banner { margin:0 16px 16px; background:white; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; }
-.kyc-icon { width:36px; height:36px; background:#e8f5e9; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.kyc-text { flex:1; }
-.kyc-text h4 { font-size:13px; font-weight:700; color:#111; }
-.kyc-text p { font-size:11px; color:#888; margin-top:1px; }
-.upgrade-btn { color:#00b140; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.hot-rates-carousel { margin:0 16px 16px; background:white; border-radius:14px; padding:14px 16px; overflow:hidden; position:relative; }
+.hot-rates-track { display:flex; gap:12px; animation:slideRates 15s linear infinite; }
+@keyframes slideRates { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); } }
+.hot-rate-item { min-width:200px; display:flex; align-items:center; gap:10px; padding:8px 12px; background:#fff8e1; border-radius:10px; flex-shrink:0; }
+.hot-rate-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hot-rate-info { flex:1; min-width:0; }
+.hot-rate-name { font-size:12px; font-weight:700; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hot-rate-value { font-size:13px; font-weight:700; color:#f57c00; margin-top:2px; }
+.hot-rate-badge { font-size:10px; font-weight:700; color:#e53935; }
 .tabs { margin:0 16px 16px; background:#ebebeb; border-radius:12px; padding:4px; display:flex; }
 .tab { flex:1; text-align:center; padding:10px; font-size:13px; font-weight:600; border-radius:9px; cursor:pointer; color:#888; transition:all .2s; }
 .tab.active { background:#111; color:white; }
@@ -130,12 +227,19 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
 .upload-zone { margin:16px; background:white; border-radius:16px; border:2.5px dashed #d0d0d0; padding:32px 20px; display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; transition:border-color .2s,background .2s; position:relative; overflow:hidden; }
 .upload-zone:hover { border-color:#111; background:#fafafa; }
 .upload-zone.has-image { border-style:solid; border-color:#00b140; padding:0; min-height:180px; }
+.upload-zone.hidden { display:none; }
 .upload-zone .upload-icon { width:56px; height:56px; background:#f0f0f0; border-radius:16px; display:flex; align-items:center; justify-content:center; }
 .upload-zone h4 { font-size:14px; font-weight:700; color:#111; }
 .upload-zone p { font-size:12px; color:#aaa; text-align:center; }
 .upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
 .upload-preview { width:100%; height:180px; object-fit:cover; border-radius:13px; display:block; }
 .upload-change-btn { position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,.65); color:white; border:none; border-radius:8px; padding:6px 12px; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:700; cursor:pointer; }
+.code-input-wrap { margin:0 16px 16px; background:white; border-radius:14px; padding:16px; border:2px solid #eee; transition:border-color .2s; }
+.code-input-wrap:focus-within { border-color:#111; }
+.code-input-wrap.hidden { display:none; }
+.code-input-label { font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+.code-input { width:100%; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:16px; font-weight:600; color:#111; background:transparent; letter-spacing:1px; }
+.code-input::placeholder { color:#ddd; font-weight:400; }
 .upload-tips { margin:0 16px 16px; }
 .upload-tips h5 { font-size:12px; font-weight:700; color:#111; margin-bottom:8px; }
 .tip-row { display:flex; align-items:flex-start; gap:8px; margin-bottom:6px; }
@@ -434,9 +538,21 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
 .bank-card-acct { font-size:12px; color:#aaa; margin-top:2px; }
 .bank-card-type { font-size:10px; font-weight:700; background:#f0f0f0; color:#888; padding:2px 8px; border-radius:8px; display:inline-block; margin-top:5px; }
 .bank-card-default { font-size:10px; font-weight:700; background:#e8f5e9; color:#00b140; padding:2px 8px; border-radius:8px; display:inline-block; margin-top:5px; }
-.bank-card-menu { width:32px; height:32px; background:#f5f5f5; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+.bank-card-menu { width:32px; height:32px; background:#f5f5f5; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; position:relative; }
+.bank-menu-dropdown { position:absolute; top:38px; right:0; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,.15); overflow:hidden; z-index:100; display:none; min-width:160px; }
+.bank-menu-item { padding:12px 16px; font-size:13px; font-weight:600; color:#111; cursor:pointer; display:flex; align-items:center; gap:10px; transition:background .15s; }
+.bank-menu-item:hover { background:#f5f5f5; }
+.bank-menu-item.danger { color:#e53935; }
+.bank-menu-item.danger:hover { background:#fce4ec; }
 .add-bank-btn { margin:0 16px 20px; background:white; border:2px dashed #e0e0e0; border-radius:16px; padding:16px; display:flex; align-items:center; gap:14px; cursor:pointer; }
 .add-bank-btn span { font-size:14px; font-weight:600; color:#888; }
+.custom-select { position:relative; }
+.custom-select-trigger { width:100%; border:none; outline:none; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; color:#111; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:4px 0; }
+.custom-select-trigger.placeholder { color:#ccc; font-weight:400; }
+.custom-select-dropdown { position:absolute; top:calc(100% + 8px); left:0; right:0; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,.15); max-height:200px; overflow-y:auto; z-index:100; display:none; }
+.custom-select-option { padding:12px 16px; font-size:14px; font-weight:600; color:#111; cursor:pointer; transition:background .15s; }
+.custom-select-option:hover { background:#f5f5f5; }
+.custom-select-option.selected { background:#e8f5e9; color:#00b140; }
 
 /* KYC */
 .kyc-steps { margin:0 16px 20px; }
@@ -471,7 +587,7 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
 .pin-step-dot.filled { background:#111; border-color:#111; transform:scale(1.1); }
 .pin-step-dot.error { background:#e53935; border-color:#e53935; animation:shake .3s ease; }
 @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
-.pin-step-numpad { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:0 16px; }
+.pin-step-numpad { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:0 16px; position:absolute; bottom:20px; left:0; right:0; }
 .pin-step-num { background:white; border:none; border-radius:14px; padding:18px; font-family:'DM Sans',sans-serif; font-size:22px; font-weight:600; color:#111; cursor:pointer; transition:all .12s; display:flex; align-items:center; justify-content:center; }
 .pin-step-num:active { background:#111; color:white; transform:scale(.94); }
 .pin-step-num.empty { background:transparent; cursor:default; pointer-events:none; }
@@ -482,20 +598,88 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
 <body>
 <div class="phone">
 
-  <!-- STATUS BAR -->
-  <div class="status-bar">
-    <span class="time" id="clock">9:41</span>
-    <div class="status-icons">
-      <svg width="18" height="13" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="12" width="4" height="6" rx="1"/><rect x="5.5" y="8" width="4" height="10" rx="1"/><rect x="11" y="4" width="4" height="14" rx="1"/><rect x="16.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
-      <span style="font-size:12px;font-weight:700;">5G</span>
-      <svg width="26" height="13" viewBox="0 0 28 14" fill="none"><rect x=".5" y=".5" width="23" height="13" rx="2.5" stroke="currentColor" stroke-width="1.2"/><rect x="2" y="2" width="19" height="10" rx="1.5" fill="currentColor"/><path d="M24.5 4.5v5a2 2 0 000-5z" fill="currentColor" opacity=".4"/></svg>
-    </div>
-  </div>
-
   <div class="pages-wrapper">
 
+    <!-- ══ ONBOARDING ══ -->
+    <div class="page active" id="page-onboard">
+      <div class="onboard-slide active">
+        <div class="onboard-img">💳</div>
+        <div class="onboard-title">Trade Gift Cards Instantly</div>
+        <div class="onboard-desc">Convert your unused gift cards to cash in minutes with the best rates in Nigeria</div>
+      </div>
+      <div class="onboard-slide">
+        <div class="onboard-img">⚡</div>
+        <div class="onboard-title">Fast & Secure Payouts</div>
+        <div class="onboard-desc">Get paid directly to your bank account with instant withdrawals and top-notch security</div>
+      </div>
+      <div class="onboard-slide">
+        <div class="onboard-img">📈</div>
+        <div class="onboard-title">Live Rate Updates</div>
+        <div class="onboard-desc">Track real-time rates and maximize your earnings with our transparent pricing</div>
+      </div>
+      <div class="onboard-footer">
+        <div class="onboard-dots">
+          <div class="onboard-dot active"></div>
+          <div class="onboard-dot"></div>
+          <div class="onboard-dot"></div>
+        </div>
+        <button class="onboard-btn" id="onboard-next" onclick="nextSlide()">Next</button>
+        <button class="onboard-btn onboard-skip" onclick="navigate('login')">Skip</button>
+      </div>
+    </div>
+
+    <!-- ══ LOGIN ══ -->
+    <div class="page" id="page-login">
+      <div class="auth-content">
+        <div class="auth-logo">CS</div>
+        <div class="auth-title">Welcome Back</div>
+        <div class="auth-subtitle">Sign in to continue trading</div>
+        <div class="auth-form">
+          <input class="auth-input" type="email" placeholder="Email address">
+          <input class="auth-input" type="password" placeholder="Password">
+          <button class="auth-btn" onclick="doLogin()">Sign In</button>
+          <div class="auth-link">Don't have an account? <a onclick="navigate('signup')">Sign Up</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SIGNUP ══ -->
+    <div class="page" id="page-signup">
+      <div class="auth-content">
+        <div class="auth-logo">CS</div>
+        <div class="auth-title">Create Account</div>
+        <div class="auth-subtitle">Join thousands of traders</div>
+        <div class="auth-form">
+          <input class="auth-input" type="text" placeholder="Full name">
+          <input class="auth-input" type="email" placeholder="Email address" id="signup-email">
+          <input class="auth-input" type="password" placeholder="Password">
+          <button class="auth-btn" onclick="doSignup()">Sign Up</button>
+          <div class="auth-link">Already have an account? <a onclick="navigate('login')">Sign In</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ OTP VERIFICATION ══ -->
+    <div class="page" id="page-otp">
+      <div class="auth-content">
+        <div class="auth-logo">🔐</div>
+        <div class="auth-title">Verify Your Email</div>
+        <div class="auth-subtitle">Enter the 4-digit code sent to<br><strong id="otp-email"></strong></div>
+        <div class="auth-form">
+          <div class="otp-inputs">
+            <input class="otp-input" type="text" maxlength="1" id="otp1" oninput="otpMove(this, null, 'otp2')" onkeydown="otpBack(event, this, null)">
+            <input class="otp-input" type="text" maxlength="1" id="otp2" oninput="otpMove(this, 'otp1', 'otp3')" onkeydown="otpBack(event, this, 'otp1')">
+            <input class="otp-input" type="text" maxlength="1" id="otp3" oninput="otpMove(this, 'otp2', 'otp4')" onkeydown="otpBack(event, this, 'otp2')">
+            <input class="otp-input" type="text" maxlength="1" id="otp4" oninput="otpMove(this, 'otp3', null)" onkeydown="otpBack(event, this, 'otp3')">
+          </div>
+          <div class="otp-resend">Didn't receive code? <a onclick="resendOTP()">Resend</a></div>
+          <button class="auth-btn" onclick="verifyOTP()">Verify & Continue</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ HOME ══ -->
-    <div class="page active" id="page-home">
+    <div class="page" id="page-home">
       <div class="page-header">
         <div class="user-info">
           <div class="avatar">J</div>
@@ -510,9 +694,12 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
         <div class="wallet-label">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
           Earnings Wallet
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          <svg id="balance-toggle" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" style="cursor:pointer;" onclick="toggleBalance()">
+            <path id="eye-open" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle id="eye-circle" cx="12" cy="12" r="3"/>
+            <line id="eye-slash" x1="1" y1="1" x2="23" y2="23" style="display:none;"/>
+          </svg>
         </div>
-        <div class="balance"><span style="font-size:28px;margin-right:4px;">₦</span>&#42;&#42;&#42;&#42;&#42;&#42;&#42;&#42;</div>
+        <div class="balance" id="balance-display"><span style="font-size:28px;margin-right:4px;">₦</span><span id="balance-value">247,500</span></div>
         <div class="card-actions">
           <button class="btn-sell" onclick="navigate('sell')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Sell Card
@@ -533,10 +720,17 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
         <div style="width:20px;height:5px;border-radius:3px;background:#333;"></div>
         <div style="width:8px;height:5px;border-radius:3px;background:#ddd;"></div>
       </div>
-      <div class="kyc-banner">
-        <div class="kyc-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div class="kyc-text"><h4>Verify to sell cards</h4><p>Complete KYC to unlock higher trade limits</p></div>
-        <div class="upgrade-btn">Upgrade</div>
+      <div class="hot-rates-carousel">
+        <div class="hot-rates-track" id="hot-rates-track">
+          <!-- Duplicated for seamless loop -->
+          <div class="hot-rate-item"><div class="hot-rate-icon" style="background:#f5f5f5;"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" style="width:18px;height:18px;object-fit:contain;"></div><div class="hot-rate-info"><div class="hot-rate-name">iTunes / Apple</div><div class="hot-rate-value">₦750/$</div></div><div class="hot-rate-badge">🔥 Hot</div></div>
+          <div class="hot-rate-item"><div class="hot-rate-icon" style="background:#fff8e1;"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" style="width:24px;height:18px;object-fit:contain;"></div><div class="hot-rate-info"><div class="hot-rate-name">Amazon</div><div class="hot-rate-value">₦680/$</div></div><div class="hot-rate-badge">🔥 Hot</div></div>
+          <div class="hot-rate-item"><div class="hot-rate-icon" style="background:#f3e5f5;"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" style="width:28px;height:18px;object-fit:contain;"></div><div class="hot-rate-info"><div class="hot-rate-name">Google Play</div><div class="hot-rate-value">₦620/$</div></div><div class="hot-rate-badge">▲ Up</div></div>
+          <!-- Duplicate for seamless loop -->
+          <div class="hot-rate-item"><div class="hot-rate-icon" style="background:#f5f5f5;"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" style="width:18px;height:18px;object-fit:contain;"></div><div class="hot-rate-info"><div class="hot-rate-name">iTunes / Apple</div><div class="hot-rate-value">₦750/$</div></div><div class="hot-rate-badge">🔥 Hot</div></div>
+          <div class="hot-rate-item"><div class="hot-rate-icon" style="background:#fff8e1;"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" style="width:24px;height:18px;object-fit:contain;"></div><div class="hot-rate-info"><div class="hot-rate-name">Amazon</div><div class="hot-rate-value">₦680/$</div></div><div class="hot-rate-badge">🔥 Hot</div></div>
+          <div class="hot-rate-item"><div class="hot-rate-icon" style="background:#f3e5f5;"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" style="width:28px;height:18px;object-fit:contain;"></div><div class="hot-rate-info"><div class="hot-rate-name">Google Play</div><div class="hot-rate-value">₦620/$</div></div><div class="hot-rate-badge">▲ Up</div></div>
+        </div>
       </div>
       <div class="tabs">
         <div class="tab" id="tab-tx" onclick="switchTab('tx')">My Transactions</div>
@@ -559,40 +753,37 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
     <div class="page" id="page-sell">
       <div class="page-title-header"><h2>Sell Gift Cards</h2><p>Choose a card type to get started</p></div>
       <div class="sell-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search gift cards..."></div>
-      <div class="filter-row">
-        <div class="filter-chip active">All</div><div class="filter-chip">USA</div><div class="filter-chip">UK</div><div class="filter-chip">Canada</div><div class="filter-chip">Global</div>
-      </div>
       <div class="section-label">🔥 Most Popular</div>
-      <div class="sell-card-item" onclick="startSell('apple','iTunes / Apple','USA Physical',750,'https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png','24px')">
+      <div class="sell-card-item" onclick="startSell('apple','iTunes / Apple')">
         <div class="card-icon apple"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" alt="Apple" style="width:24px;height:24px;object-fit:contain;"></div>
-        <div class="sell-card-body"><div class="sell-card-name">iTunes / Apple</div><div class="sell-card-sub">USA Physical · $25–$500</div><div class="sell-card-rate">₦750 per $1</div></div>
-        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('apple','iTunes / Apple','USA Physical',750,'https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png','24px')">Sell</button>
+        <div class="sell-card-body"><div class="sell-card-name">iTunes / Apple</div><div class="sell-card-sub">Physical & E-code · $25–$500</div><div class="sell-card-rate">From ₦650 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('apple','iTunes / Apple')">Sell</button>
       </div>
-      <div class="sell-card-item" onclick="startSell('amazon','Amazon','USA E-code',680,'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg','36px')">
+      <div class="sell-card-item" onclick="startSell('amazon','Amazon')">
         <div class="card-icon amazon"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" style="width:36px;height:36px;object-fit:contain;"></div>
-        <div class="sell-card-body"><div class="sell-card-name">Amazon</div><div class="sell-card-sub">USA E-code · $10–$200</div><div class="sell-card-rate">₦680 per $1</div></div>
-        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('amazon','Amazon','USA E-code',680,'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg','36px')">Sell</button>
+        <div class="sell-card-body"><div class="sell-card-name">Amazon</div><div class="sell-card-sub">Physical & E-code · $10–$200</div><div class="sell-card-rate">From ₦600 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('amazon','Amazon')">Sell</button>
       </div>
       <div class="section-label" style="margin-top:6px;">All Cards</div>
-      <div class="sell-card-item" onclick="startSell('google','Google Play','USA Physical',620,'https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg','40px')">
+      <div class="sell-card-item" onclick="startSell('google','Google Play')">
         <div class="card-icon google"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style="width:40px;height:40px;object-fit:contain;"></div>
-        <div class="sell-card-body"><div class="sell-card-name">Google Play</div><div class="sell-card-sub">USA Physical · $25–$500</div><div class="sell-card-rate">₦620 per $1</div></div>
-        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('google','Google Play','USA Physical',620,'https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg','40px')">Sell</button>
+        <div class="sell-card-body"><div class="sell-card-name">Google Play</div><div class="sell-card-sub">Physical & E-code · $25–$500</div><div class="sell-card-rate">From ₦550 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('google','Google Play')">Sell</button>
       </div>
-      <div class="sell-card-item" onclick="startSell('steam','Steam Wallet','Global',580,'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg','26px')">
+      <div class="sell-card-item" onclick="startSell('steam','Steam Wallet')">
         <div class="card-icon steam"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" alt="Steam" style="width:26px;height:26px;object-fit:contain;"></div>
-        <div class="sell-card-body"><div class="sell-card-name">Steam Wallet</div><div class="sell-card-sub">Global · $20–$100</div><div class="sell-card-rate">₦580 per $1</div></div>
-        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('steam','Steam Wallet','Global',580,'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg','26px')">Sell</button>
+        <div class="sell-card-body"><div class="sell-card-name">Steam Wallet</div><div class="sell-card-sub">Global · $20–$100</div><div class="sell-card-rate">From ₦580 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('steam','Steam Wallet')">Sell</button>
       </div>
-      <div class="sell-card-item" onclick="startSell('visa','Visa Gift Card','USA Physical',540,'https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png','38px')">
+      <div class="sell-card-item" onclick="startSell('visa','Visa Gift Card')">
         <div class="card-icon visa"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" style="width:38px;height:38px;object-fit:contain;"></div>
-        <div class="sell-card-body"><div class="sell-card-name">Visa Gift Card</div><div class="sell-card-sub">USA Physical · $50–$500</div><div class="sell-card-rate">₦540 per $1</div></div>
-        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('visa','Visa Gift Card','USA Physical',540,'https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png','38px')">Sell</button>
+        <div class="sell-card-body"><div class="sell-card-name">Visa Gift Card</div><div class="sell-card-sub">Physical · $50–$500</div><div class="sell-card-rate">From ₦500 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('visa','Visa Gift Card')">Sell</button>
       </div>
-      <div class="sell-card-item" style="margin-bottom:20px;" onclick="startSell('razer','Razer Gold','Global',560,'https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg','32px')">
+      <div class="sell-card-item" style="margin-bottom:20px;" onclick="startSell('razer','Razer Gold')">
         <div class="card-icon razer"><img src="https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg" alt="Razer" style="width:32px;height:32px;object-fit:contain;"></div>
-        <div class="sell-card-body"><div class="sell-card-name">Razer Gold</div><div class="sell-card-sub">Global · $5–$100</div><div class="sell-card-rate">₦560 per $1</div></div>
-        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('razer','Razer Gold','Global',560,'https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg','32px')">Sell</button>
+        <div class="sell-card-body"><div class="sell-card-name">Razer Gold</div><div class="sell-card-sub">Global · $5–$100</div><div class="sell-card-rate">From ₦560 per $1</div></div>
+        <button class="sell-btn-sm" onclick="event.stopPropagation();startSell('razer','Razer Gold')">Sell</button>
       </div>
     </div>
 
@@ -600,7 +791,7 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
     <div class="page" id="page-sell-upload">
       <div class="sub-header">
         <div class="back-btn" onclick="navigate('sell')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
-        <h3>Upload Card Image</h3>
+        <h3>Card Details</h3>
       </div>
       <!-- Step Indicator -->
       <div class="step-indicator">
@@ -613,10 +804,32 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
       <!-- Hero card -->
       <div class="upload-card-hero" id="upload-hero">
         <div class="card-icon-lg apple" id="upload-hero-icon"><img id="upload-hero-img" src="" alt="" style="width:28px;height:28px;object-fit:contain;"></div>
-        <div class="card-hero-info"><h3 id="upload-hero-name">iTunes / Apple</h3><p id="upload-hero-sub">USA Physical</p></div>
-        <div class="card-hero-rate"><span>Rate</span><strong id="upload-hero-rate">₦750/$</strong></div>
+        <div class="card-hero-info"><h3 id="upload-hero-name">iTunes / Apple</h3><p id="upload-hero-sub"></p></div>
+        <div class="card-hero-rate"><span>Rate</span><strong id="upload-hero-rate">₦0/$</strong></div>
       </div>
-      <!-- Upload zone -->
+      <!-- Country Selection -->
+      <div style="padding:0 16px 8px;font-size:13px;font-weight:600;color:#666;">Select country</div>
+      <div class="filter-row" id="country-filter-row" style="margin-bottom:16px;">
+        <div class="filter-chip active" data-country="usa" onclick="event.stopPropagation();selectCountryUpload('usa',this)">🇺🇸 USA</div>
+        <div class="filter-chip" data-country="uk" onclick="event.stopPropagation();selectCountryUpload('uk',this)">🇬🇧 UK</div>
+        <div class="filter-chip" data-country="canada" onclick="event.stopPropagation();selectCountryUpload('canada',this)">🇨🇦 Canada</div>
+        <div class="filter-chip" data-country="australia" onclick="event.stopPropagation();selectCountryUpload('australia',this)">🇦🇺 Australia</div>
+      </div>
+      <!-- Card Type Dropdown -->
+      <div style="padding:0 16px 8px;font-size:13px;font-weight:600;color:#666;">Card type</div>
+      <div style="margin:0 16px 16px;">
+        <div class="custom-select">
+          <div class="custom-select-trigger" id="cardtype-select-trigger" onclick="toggleCardTypeSelect()">
+            <span id="cardtype-select-value">📷 Physical Card</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="custom-select-dropdown" id="cardtype-select-dropdown">
+            <div class="custom-select-option" onclick="selectCardTypeOption('physical')"><span>📷</span> Physical Card</div>
+            <div class="custom-select-option" onclick="selectCardTypeOption('ecode')"><span>💳</span> E-code</div>
+          </div>
+        </div>
+      </div>
+      <!-- Upload zone (for Physical) -->
       <div class="upload-zone" id="upload-zone">
         <div class="upload-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
         <h4>Upload card image</h4>
@@ -625,13 +838,18 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
         <img class="upload-preview" id="upload-preview" src="" alt="" style="display:none;">
         <button class="upload-change-btn" id="upload-change-btn" style="display:none;" onclick="event.stopPropagation();document.getElementById('card-img-input').click()">Change Photo</button>
       </div>
+      <!-- Code input (required for e-code, optional for physical) -->
+      <div class="code-input-wrap" id="code-input-wrap">
+        <div class="code-input-label" id="code-input-label">Card Code (Optional)</div>
+        <textarea class="code-input" id="card-code-input" placeholder="Enter card code or PIN" rows="3" style="resize:none;font-family:'DM Sans',sans-serif;"></textarea>
+      </div>
       <!-- Tips -->
       <div class="upload-tips">
-        <h5>📸 Photo Tips</h5>
-        <div class="tip-row"><div class="tip-dot"></div><p>Ensure card number and PIN are clearly visible</p></div>
-        <div class="tip-row"><div class="tip-dot"></div><p>Good lighting — avoid glare and shadows</p></div>
-        <div class="tip-row"><div class="tip-dot"></div><p>Scratch off the PIN cover completely</p></div>
-        <div class="tip-row"><div class="tip-dot"></div><p>Upload both front and back for faster processing</p></div>
+        <h5 id="tips-title">📸 Photo Tips</h5>
+        <div class="tip-row" id="tip1"><div class="tip-dot"></div><p>Ensure card number and PIN are clearly visible</p></div>
+        <div class="tip-row" id="tip2"><div class="tip-dot"></div><p>Good lighting — avoid glare and shadows</p></div>
+        <div class="tip-row" id="tip3"><div class="tip-dot"></div><p>Scratch off the PIN cover completely</p></div>
+        <div class="tip-row" id="tip4"><div class="tip-dot"></div><p>Upload both front and back for faster processing</p></div>
       </div>
       <button class="flow-next-btn" id="upload-next-btn" disabled onclick="goToStep2()">
         Continue <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -653,8 +871,8 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
       </div>
       <div class="denom-card-hero" id="denom-hero">
         <div class="card-icon-lg apple" id="denom-hero-icon"><img id="denom-hero-img" src="" alt="" style="width:28px;height:28px;object-fit:contain;"></div>
-        <div class="card-hero-info"><h3 id="denom-hero-name">iTunes / Apple</h3><p id="denom-hero-sub">USA Physical</p></div>
-        <div class="card-hero-rate"><span>Rate</span><strong id="denom-hero-rate">₦750/$</strong></div>
+        <div class="card-hero-info"><h3 id="denom-hero-name">iTunes / Apple</h3><p id="denom-hero-sub"></p></div>
+        <div class="card-hero-rate"><span>Rate</span><strong id="denom-hero-rate">₦0/$</strong></div>
       </div>
       <div style="padding:0 16px 14px;font-size:13px;font-weight:600;color:#666;">Select denomination</div>
       <div class="denom-grid" id="denom-grid">
@@ -671,7 +889,7 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
       <div class="denom-payout-preview" id="payout-preview" style="display:none;">
         <div class="payout-row"><span class="payout-label">Card Value</span><span class="payout-value" id="p-card-val">$0</span></div>
         <div class="payout-row"><span class="payout-label">Rate</span><span class="payout-value" id="p-rate">₦0/$</span></div>
-        <div class="payout-row"><span class="payout-label">Processing Fee (2%)</span><span class="payout-value" id="p-fee" style="color:#e53935;">−₦0</span></div>
+        <div class="payout-row"><span class="payout-label">Processing Fee</span><span class="payout-value" id="p-fee" style="color:#e53935;">−₦50</span></div>
         <div class="payout-row"><span class="payout-total-label">You Receive</span><span class="payout-total-value" id="p-total">₦0</span></div>
       </div>
       <button class="flow-next-btn" id="denom-next-btn" disabled onclick="submitSell()">
@@ -719,14 +937,57 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
       </div>
       <div class="rate-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search card rates..."></div>
       <div style="background:white;margin:0 16px;border-radius:14px;overflow:hidden;">
-        <div class="rate-card-item"><div class="card-icon apple"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" alt="Apple" style="width:24px;height:24px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">iTunes / Apple</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦750/$</div><div class="rate-badge hot">🔥 Hot</div></div></div>
-        <div class="rate-card-item"><div class="card-icon amazon"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" style="width:36px;height:36px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Amazon</div><div class="rate-sub">USA E-code</div></div><div class="rate-right"><div class="rate-val">₦680/$</div><div class="rate-badge hot">🔥 Hot</div></div></div>
-        <div class="rate-card-item"><div class="card-icon google"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style="width:40px;height:40px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Google Play</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦620/$</div><div class="rate-badge low">▼ Low</div></div></div>
-        <div class="rate-card-item"><div class="card-icon steam"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" alt="Steam" style="width:26px;height:26px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Steam Wallet</div><div class="rate-sub">Global</div></div><div class="rate-right"><div class="rate-val">₦580/$</div><div class="rate-badge stable">— Stable</div></div></div>
-        <div class="rate-card-item"><div class="card-icon visa"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" style="width:38px;height:38px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Visa Gift Card</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦540/$</div><div class="rate-badge low">▼ Low</div></div></div>
-        <div class="rate-card-item"><div class="card-icon razer"><img src="https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg" alt="Razer" style="width:32px;height:32px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Razer Gold</div><div class="rate-sub">Global</div></div><div class="rate-right"><div class="rate-val">₦560/$</div><div class="rate-badge stable">— Stable</div></div></div>
+        <div class="rate-card-item" style="cursor:pointer;" onclick="openRateCalc('apple','iTunes / Apple')"><div class="card-icon apple"><img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" alt="Apple" style="width:24px;height:24px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">iTunes / Apple</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦750/$</div><div class="rate-badge hot">🔥 Hot</div></div></div>
+        <div class="rate-card-item" style="cursor:pointer;" onclick="openRateCalc('amazon','Amazon')"><div class="card-icon amazon"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" style="width:36px;height:36px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Amazon</div><div class="rate-sub">USA E-code</div></div><div class="rate-right"><div class="rate-val">₦680/$</div><div class="rate-badge hot">🔥 Hot</div></div></div>
+        <div class="rate-card-item" style="cursor:pointer;" onclick="openRateCalc('google','Google Play')"><div class="card-icon google"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play" style="width:40px;height:40px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Google Play</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦620/$</div><div class="rate-badge low">▼ Low</div></div></div>
+        <div class="rate-card-item" style="cursor:pointer;" onclick="openRateCalc('steam','Steam Wallet')"><div class="card-icon steam"><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" alt="Steam" style="width:26px;height:26px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Steam Wallet</div><div class="rate-sub">Global</div></div><div class="rate-right"><div class="rate-val">₦580/$</div><div class="rate-badge stable">— Stable</div></div></div>
+        <div class="rate-card-item" style="cursor:pointer;" onclick="openRateCalc('visa','Visa Gift Card')"><div class="card-icon visa"><img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" style="width:38px;height:38px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Visa Gift Card</div><div class="rate-sub">USA Physical</div></div><div class="rate-right"><div class="rate-val">₦540/$</div><div class="rate-badge low">▼ Low</div></div></div>
+        <div class="rate-card-item" style="cursor:pointer;" onclick="openRateCalc('razer','Razer Gold')"><div class="card-icon razer"><img src="https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg" alt="Razer" style="width:32px;height:32px;object-fit:contain;"></div><div class="rate-info"><div class="rate-name">Razer Gold</div><div class="rate-sub">Global</div></div><div class="rate-right"><div class="rate-val">₦560/$</div><div class="rate-badge stable">— Stable</div></div></div>
       </div>
       <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ RATE CALCULATOR ══ -->
+    <div class="page" id="page-rate-calc">
+      <div class="sub-header">
+        <div class="back-btn" onclick="navigate('rates')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <h3>Rate Calculator</h3>
+        <div style="width:36px;"></div>
+      </div>
+      <div class="upload-card-hero" id="calc-hero">
+        <div class="card-icon-lg apple" id="calc-hero-icon"><img id="calc-hero-img" src="" alt="" style="width:28px;height:28px;object-fit:contain;"></div>
+        <div class="card-hero-info"><h3 id="calc-hero-name">iTunes / Apple</h3><p id="calc-hero-sub">USA · Physical</p></div>
+        <div class="card-hero-rate"><span>Rate</span><strong id="calc-hero-rate">₦0/$</strong></div>
+      </div>
+      <div style="padding:0 16px 8px;font-size:13px;font-weight:600;color:#666;">Select country</div>
+      <div class="filter-row" id="calc-country-row" style="margin-bottom:16px;">
+        <div class="filter-chip active" data-country="usa" onclick="event.stopPropagation();selectCalcCountry('usa',this)">🇺🇸 USA</div>
+        <div class="filter-chip" data-country="uk" onclick="event.stopPropagation();selectCalcCountry('uk',this)">🇬🇧 UK</div>
+        <div class="filter-chip" data-country="canada" onclick="event.stopPropagation();selectCalcCountry('canada',this)">🇨🇦 Canada</div>
+        <div class="filter-chip" data-country="australia" onclick="event.stopPropagation();selectCalcCountry('australia',this)">🇦🇺 Australia</div>
+      </div>
+      <div style="padding:0 16px 8px;font-size:13px;font-weight:600;color:#666;">Card type</div>
+      <div class="filter-row" id="calc-type-row" style="margin-bottom:16px;">
+        <div class="filter-chip active" onclick="event.stopPropagation();selectCalcType('physical',this)">📷 Physical</div>
+        <div class="filter-chip" onclick="event.stopPropagation();selectCalcType('ecode',this)">💳 E-code</div>
+      </div>
+      <div style="padding:0 16px 14px;font-size:13px;font-weight:600;color:#666;">Enter card value</div>
+      <div class="custom-amount-wrap">
+        <div class="custom-label">Card Amount (USD)</div>
+        <div class="custom-input-row">
+          <span class="dollar-sign">$</span>
+          <input class="custom-amount-input" type="number" id="calc-amount" placeholder="0" min="1" max="1000" oninput="calcPayout(this.value)">
+        </div>
+      </div>
+      <div class="denom-payout-preview" id="calc-preview" style="display:none;">
+        <div class="payout-row"><span class="payout-label">Card Value</span><span class="payout-value" id="calc-card-val">$0</span></div>
+        <div class="payout-row"><span class="payout-label">Rate</span><span class="payout-value" id="calc-rate">₦0/$</span></div>
+        <div class="payout-row"><span class="payout-label">Processing Fee</span><span class="payout-value" id="calc-fee" style="color:#e53935;">−₦50</span></div>
+        <div class="payout-row"><span class="payout-total-label">You Receive</span><span class="payout-total-value" id="calc-total">₦0</span></div>
+      </div>
+      <button class="flow-next-btn" onclick="navigate('sell')" style="margin-top:12px;">
+        Sell This Card <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
     </div>
 
     <!-- ══ SETTINGS ══ -->
@@ -742,14 +1003,13 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
         <div class="settings-group">
           <div class="settings-item" onclick="navigate('settings-personal')"><div class="settings-item-icon" style="background:#e8f5e9;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00b140" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="settings-item-label">Personal Info</div><div class="settings-item-value">›</div></div>
           <div class="settings-item" onclick="navigate('settings-banks')"><div class="settings-item-icon" style="background:#e3f2fd;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1976d2" stroke-width="2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><div class="settings-item-label">Bank Accounts</div><div class="settings-item-value">2 linked ›</div></div>
-          <div class="settings-item" onclick="navigate('settings-kyc')"><div class="settings-item-icon" style="background:#f3e5f5;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7b1fa2" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="settings-item-label">KYC Verification</div><div class="settings-item-value" style="color:#f57c00;">Pending ›</div></div>
         </div>
       </div>
       <div class="settings-section">
         <div class="settings-section-title">Preferences</div>
         <div class="settings-group">
           <div class="settings-item"><div class="settings-item-icon" style="background:#fff8e1;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f9a825" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="settings-item-label">Notifications</div><div class="stoggle" onclick="this.classList.toggle('off')"></div></div>
-          <div class="settings-item"><div class="settings-item-icon" style="background:#fce4ec;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e91e63" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="settings-item-label">Dark Mode</div><div class="stoggle off" onclick="this.classList.toggle('off')"></div></div>
+          <div class="settings-item"><div class="settings-item-icon" style="background:#fce4ec;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e91e63" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="settings-item-label">Dark Mode</div><div class="stoggle off" id="dark-mode-toggle" onclick="toggleDarkMode()"></div></div>
           <div class="settings-item" onclick="navigate('settings-language')"><div class="settings-item-icon" style="background:#e8eaf6;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3f51b5" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div><div class="settings-item-label">Language</div><div class="settings-item-value" id="lang-display">English ›</div></div>
         </div>
       </div>
@@ -812,7 +1072,7 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
       <div class="wd-section-title">Summary</div>
       <div class="wd-fee-box">
         <div class="wd-fee-row"><span class="wd-fee-label">Amount</span><span class="wd-fee-value" id="wd-sum-amount">₦0</span></div>
-        <div class="wd-fee-row"><span class="wd-fee-label">Transfer Fee (1%)</span><span class="wd-fee-value" id="wd-sum-fee" style="color:#e53935;">−₦0</span></div>
+        <div class="wd-fee-row"><span class="wd-fee-label">Transfer Fee</span><span class="wd-fee-value" id="wd-sum-fee" style="color:#e53935;">−₦0</span></div>
         <div class="wd-fee-row"><span class="wd-fee-total-label">You Receive</span><span class="wd-fee-total-value" id="wd-sum-net">₦0</span></div>
       </div>
       <button class="flow-next-btn" id="wd-next-btn" disabled onclick="goToWdConfirm()" style="margin-top:12px;">
@@ -1141,20 +1401,6 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
           <div class="settings-form-label">Email Address</div>
           <div class="settings-form-static">orjiace&#64;gmail&#46;com</div>
         </div>
-        <div class="settings-form-row">
-          <div class="settings-form-label">Phone Number</div>
-          <input class="settings-form-input" type="tel" value="+234 801 234 5678" placeholder="Phone number">
-        </div>
-        <div class="settings-form-row">
-          <div class="settings-form-label">Date of Birth</div>
-          <input class="settings-form-input" type="text" value="12 / Mar / 1998" placeholder="DD / MMM / YYYY">
-        </div>
-        <div class="settings-form-row">
-          <div class="settings-form-label">Gender</div>
-          <select class="settings-form-input" style="appearance:none;cursor:pointer;">
-            <option>Male</option><option>Female</option><option>Prefer not to say</option>
-          </select>
-        </div>
       </div>
       <div class="settings-info-box">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1180,7 +1426,13 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
           <div class="bank-card-acct">•••• •••• •••• 4821</div>
           <div style="display:flex;gap:6px;margin-top:5px;"><span class="bank-card-default">Default</span><span class="bank-card-type">Savings</span></div>
         </div>
-        <div class="bank-card-menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><circle cx="12" cy="5" r="1" fill="#aaa"/><circle cx="12" cy="12" r="1" fill="#aaa"/><circle cx="12" cy="19" r="1" fill="#aaa"/></svg></div>
+        <div class="bank-card-menu" onclick="toggleBankMenu(event, 0)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><circle cx="12" cy="5" r="1" fill="#aaa"/><circle cx="12" cy="12" r="1" fill="#aaa"/><circle cx="12" cy="19" r="1" fill="#aaa"/></svg>
+          <div class="bank-menu-dropdown" id="bank-menu-0">
+            <div class="bank-menu-item" onclick="event.stopPropagation();showSavedToast('Already set as default')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Make Default</div>
+            <div class="bank-menu-item danger" onclick="event.stopPropagation();deleteBank(0)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Delete Account</div>
+          </div>
+        </div>
       </div>
 
       <div class="bank-card">
@@ -1190,7 +1442,13 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
           <div class="bank-card-acct">•••• •••• •••• 9034</div>
           <div style="margin-top:5px;"><span class="bank-card-type">Current</span></div>
         </div>
-        <div class="bank-card-menu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><circle cx="12" cy="5" r="1" fill="#aaa"/><circle cx="12" cy="12" r="1" fill="#aaa"/><circle cx="12" cy="19" r="1" fill="#aaa"/></svg></div>
+        <div class="bank-card-menu" onclick="toggleBankMenu(event, 1)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><circle cx="12" cy="5" r="1" fill="#aaa"/><circle cx="12" cy="12" r="1" fill="#aaa"/><circle cx="12" cy="19" r="1" fill="#aaa"/></svg>
+          <div class="bank-menu-dropdown" id="bank-menu-1">
+            <div class="bank-menu-item" onclick="event.stopPropagation();makeDefaultBank(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Make Default</div>
+            <div class="bank-menu-item danger" onclick="event.stopPropagation();deleteBank(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Delete Account</div>
+          </div>
+        </div>
       </div>
 
       <div class="add-bank-btn" onclick="showAddBankSheet()">
@@ -1209,13 +1467,24 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
       <div id="add-bank-sheet" style="display:none;margin:0 16px 20px;background:white;border-radius:20px;padding:20px;">
         <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:16px;">Add Bank Account</div>
         <div class="settings-form-wrap" style="margin:0 0 14px;">
-          <div class="settings-form-row">
-            <div class="settings-form-label">Bank Name</div>
-            <select class="settings-form-input" style="appearance:none;cursor:pointer;">
-              <option value="">Select bank...</option>
-              <option>Access Bank</option><option>First Bank</option><option>GTBank</option><option>Kuda Bank</option><option>Opay</option><option>UBA</option><option>Zenith Bank</option>
-            </select>
+        <div class="settings-form-row">
+          <div class="settings-form-label">Bank Name</div>
+          <div class="custom-select">
+            <div class="custom-select-trigger placeholder" id="bank-select-trigger" onclick="toggleBankSelect()">
+              <span id="bank-select-value">Select bank...</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="custom-select-dropdown" id="bank-select-dropdown">
+              <div class="custom-select-option" onclick="selectBankOption('Access Bank')">Access Bank</div>
+              <div class="custom-select-option" onclick="selectBankOption('First Bank')">First Bank</div>
+              <div class="custom-select-option" onclick="selectBankOption('GTBank')">GTBank</div>
+              <div class="custom-select-option" onclick="selectBankOption('Kuda Bank')">Kuda Bank</div>
+              <div class="custom-select-option" onclick="selectBankOption('Opay')">Opay</div>
+              <div class="custom-select-option" onclick="selectBankOption('UBA')">UBA</div>
+              <div class="custom-select-option" onclick="selectBankOption('Zenith Bank')">Zenith Bank</div>
+            </div>
           </div>
+        </div>
           <div class="settings-form-row">
             <div class="settings-form-label">Account Number</div>
             <input class="settings-form-input" type="number" placeholder="0123456789" maxlength="10">
@@ -1232,72 +1501,7 @@ body { font-family:'DM Sans',sans-serif; background:#e0e0e0; display:flex; justi
     </div>
 
     <!-- ══ KYC VERIFICATION ══ -->
-    <div class="page" id="page-settings-kyc">
-      <div class="sub-header">
-        <div class="back-btn" onclick="navigate('settings')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></div>
-        <h3>KYC Verification</h3>
-        <div style="width:36px;"></div>
-      </div>
-
-      <div class="kyc-tier-box">
-        <div class="kyc-tier-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div class="kyc-tier-info">
-          <h4>Basic Tier · Upgrade Available</h4>
-          <p>Daily limit: ₦200,000 · Upgrade to ₦2,000,000</p>
-        </div>
-      </div>
-
-      <div style="padding:0 16px 14px;font-size:13px;color:#888;line-height:1.5;">Complete all steps below to verify your identity and unlock full platform benefits.</div>
-
-      <div class="kyc-steps">
-        <!-- Step 1: Done -->
-        <div class="kyc-step">
-          <div class="kyc-step-left"><div class="kyc-step-num done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="kyc-step-line"></div></div>
-          <div class="kyc-step-content"><div class="kyc-step-title">Email Verified ✓</div><div class="kyc-step-sub">orjiace&#64;gmail&#46;com verified</div></div>
-        </div>
-        <!-- Step 2: Done -->
-        <div class="kyc-step">
-          <div class="kyc-step-left"><div class="kyc-step-num done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="kyc-step-line"></div></div>
-          <div class="kyc-step-content"><div class="kyc-step-title">Phone Verified ✓</div><div class="kyc-step-sub">+234 801 234 5678 verified</div></div>
-        </div>
-        <!-- Step 3: Active -->
-        <div class="kyc-step">
-          <div class="kyc-step-left"><div class="kyc-step-num active">3</div><div class="kyc-step-line"></div></div>
-          <div class="kyc-step-content">
-            <div class="kyc-step-title">Government ID</div>
-            <div class="kyc-step-sub">Upload a valid NIN slip, driver's licence, or international passport</div>
-            <div class="kyc-upload-box">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <p>Tap to upload ID document</p>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:10px;">
-              <div style="flex:1;background:#f8f8f8;border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:#666;">NIN Slip</div>
-              <div style="flex:1;background:#f8f8f8;border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:#666;">Driver's Licence</div>
-              <div style="flex:1;background:#f8f8f8;border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:#666;">Passport</div>
-            </div>
-          </div>
-        </div>
-        <!-- Step 4: Todo -->
-        <div class="kyc-step">
-          <div class="kyc-step-left"><div class="kyc-step-num todo">4</div><div class="kyc-step-line"></div></div>
-          <div class="kyc-step-content">
-            <div class="kyc-step-title" style="color:#aaa;">Selfie Verification</div>
-            <div class="kyc-step-sub">Take a selfie holding your ID document</div>
-          </div>
-        </div>
-        <!-- Step 5: Todo -->
-        <div class="kyc-step">
-          <div class="kyc-step-left"><div class="kyc-step-num todo">5</div></div>
-          <div class="kyc-step-content">
-            <div class="kyc-step-title" style="color:#aaa;">Review & Approval</div>
-            <div class="kyc-step-sub">Our team reviews within 24 hours</div>
-          </div>
-        </div>
-      </div>
-
-      <button class="settings-save-btn" onclick="showSavedToast()">Submit for Verification</button>
-      <div style="height:16px;"></div>
-    </div>
+    <!-- REMOVED - KYC functionality removed from app -->
 
     <!-- ══ LANGUAGE ══ -->
     <div class="page" id="page-settings-language">
@@ -1410,7 +1614,8 @@ function tick() {
 // ── STATE ──
 const FLOW_PAGES = ['sell-upload','sell-denom','sell-success'];
 const NAV_PAGES  = ['home','sell','rates','settings'];
-let cur = 'home';
+const AUTH_PAGES = ['onboard','login','signup','otp'];
+let cur = 'onboard';
 let sellCard = {};
 let selectedDenom = 0;
 
@@ -1433,7 +1638,7 @@ function navigate(p) {
     document.getElementById('nav-home').classList.add('active');
   }
   if (p === 'notifications') renderNotifList();
-  const hideNav = ['sell-success','wd-success'].includes(p);
+  const hideNav = ['sell-success','wd-success'].includes(p) || AUTH_PAGES.includes(p);
   document.getElementById('bottom-nav').style.display = hideNav ? 'none' : 'flex';
 }
 
@@ -1449,21 +1654,119 @@ function switchTab(t) {
 // ── FILTER CHIPS ── (handled in DOMContentLoaded)
 
 // ── SELL FLOW ──
-function startSell(type, name, sub, rate, imgSrc, imgSize) {
-  sellCard = { type, name, sub, rate, imgSrc, imgSize };
+const CARD_RATES = {
+  apple: { usa: 750, uk: 680, canada: 620, australia: 590, img: 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png', size: '24px' },
+  amazon: { usa: 680, uk: 620, canada: 580, australia: 550, img: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg', size: '36px' },
+  google: { usa: 620, uk: 570, canada: 530, australia: 500, img: 'https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg', size: '40px' },
+  steam: { usa: 580, uk: 550, canada: 520, australia: 490, img: 'https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg', size: '26px' },
+  visa: { usa: 540, uk: 500, canada: 470, australia: 440, img: 'https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png', size: '38px' },
+  razer: { usa: 560, uk: 530, canada: 500, australia: 470, img: 'https://upload.wikimedia.org/wikipedia/commons/9/94/Razer_logo.svg', size: '32px' }
+};
+
+function startSell(type, name) {
+  sellCard = { type, name, country: 'usa', cardType: 'physical', rate: CARD_RATES[type].usa, imgSrc: CARD_RATES[type].img, imgSize: CARD_RATES[type].size };
   selectedDenom = 0;
   document.getElementById('custom-amt').value = '';
+  document.getElementById('card-code-input').value = '';
   const zone = document.getElementById('upload-zone');
-  zone.classList.remove('has-image');
+  zone.classList.remove('has-image','hidden');
   document.getElementById('upload-preview').style.display = 'none';
   document.getElementById('upload-change-btn').style.display = 'none';
   zone.querySelector('.upload-icon').style.display = 'flex';
   zone.querySelector('h4').style.display = 'block';
   zone.querySelector('p').style.display = 'block';
   document.getElementById('upload-next-btn').disabled = true;
-  setHero('upload-hero', type, name, sub, rate, imgSrc, imgSize);
+  // Reset country and card type
+  document.querySelectorAll('[data-country]').forEach(c => c.classList.remove('active'));
+  document.querySelector('[data-country="usa"]').classList.add('active');
+  document.getElementById('cardtype-select-value').textContent = '📷 Physical Card';
+  document.getElementById('code-input-wrap').classList.remove('hidden');
+  document.getElementById('code-input-label').textContent = 'Card Code (Optional)';
+  document.getElementById('card-code-input').placeholder = 'Enter card code or PIN';
+  setHero('upload-hero', type, name, 'USA', CARD_RATES[type].usa, CARD_RATES[type].img, CARD_RATES[type].size);
+  updateTips('physical');
   navigate('sell-upload');
 }
+
+function selectCountryUpload(country, el) {
+  sellCard.country = country;
+  sellCard.rate = CARD_RATES[sellCard.type][country];
+  el.closest('.filter-row').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const countryNames = { usa: 'USA', uk: 'UK', canada: 'Canada', australia: 'Australia' };
+  document.getElementById('upload-hero-sub').textContent = countryNames[country];
+  document.getElementById('upload-hero-rate').textContent = '₦' + sellCard.rate + '/$';
+}
+
+function selectCardTypeOption(type) {
+  sellCard.cardType = type;
+  const trigger = document.getElementById('cardtype-select-trigger');
+  const value = document.getElementById('cardtype-select-value');
+  const icon = type === 'physical' ? '📷' : '💳';
+  const label = type === 'physical' ? 'Physical Card' : 'E-code';
+  value.textContent = icon + ' ' + label;
+  document.getElementById('cardtype-select-dropdown').style.display = 'none';
+  
+  const zone = document.getElementById('upload-zone');
+  const codeWrap = document.getElementById('code-input-wrap');
+  const codeLabel = document.getElementById('code-input-label');
+  const codeInput = document.getElementById('card-code-input');
+  
+  if (type === 'ecode') {
+    zone.classList.add('hidden');
+    codeWrap.classList.remove('hidden');
+    codeLabel.textContent = 'Card Code';
+    codeInput.placeholder = 'Enter your e-code here';
+    document.getElementById('upload-next-btn').disabled = !codeInput.value.trim();
+  } else {
+    zone.classList.remove('hidden');
+    codeWrap.classList.remove('hidden');
+    codeLabel.textContent = 'Card Code (Optional)';
+    codeInput.placeholder = 'Enter card code or PIN';
+    const hasImage = zone.classList.contains('has-image');
+    document.getElementById('upload-next-btn').disabled = !hasImage;
+  }
+  updateTips(type);
+}
+
+function toggleCardTypeSelect() {
+  const dropdown = document.getElementById('cardtype-select-dropdown');
+  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+function updateTips(type) {
+  const tipsTitle = document.getElementById('tips-title');
+  const tip1 = document.getElementById('tip1');
+  const tip2 = document.getElementById('tip2');
+  const tip3 = document.getElementById('tip3');
+  const tip4 = document.getElementById('tip4');
+  
+  if (type === 'ecode') {
+    tipsTitle.textContent = '📝 E-code Tips';
+    tip1.querySelector('p').textContent = 'Enter the complete code exactly as shown';
+    tip2.querySelector('p').textContent = 'Double-check for typos before submitting';
+    tip3.querySelector('p').textContent = 'Do not share your code with anyone else';
+    tip4.querySelector('p').textContent = 'Ensure the code has not been redeemed';
+  } else {
+    tipsTitle.textContent = '📸 Photo Tips';
+    tip1.querySelector('p').textContent = 'Ensure card number and PIN are clearly visible';
+    tip2.querySelector('p').textContent = 'Good lighting — avoid glare and shadows';
+    tip3.querySelector('p').textContent = 'Scratch off the PIN cover completely';
+    tip4.querySelector('p').textContent = 'Upload both front and back for faster processing';
+  }
+}
+
+// Listen to code input for e-code validation
+document.addEventListener('DOMContentLoaded', function() {
+  const codeInput = document.getElementById('card-code-input');
+  if (codeInput) {
+    codeInput.addEventListener('input', function() {
+      if (sellCard.cardType === 'ecode') {
+        document.getElementById('upload-next-btn').disabled = !this.value.trim();
+      }
+    });
+  }
+});
 
 function setHero(prefix, type, name, sub, rate, imgSrc, imgSize) {
   const icon = document.getElementById(prefix + '-icon');
@@ -1471,8 +1774,8 @@ function setHero(prefix, type, name, sub, rate, imgSrc, imgSize) {
   const img = document.getElementById(prefix + '-img');
   img.src = imgSrc; img.style.width = imgSize; img.style.height = imgSize;
   document.getElementById(prefix + '-name').textContent = name;
-  document.getElementById(prefix + '-sub').textContent  = sub;
-  document.getElementById(prefix + '-rate').textContent = '₦' + rate + '/$';
+  if (sub) document.getElementById(prefix + '-sub').textContent = sub;
+  if (rate) document.getElementById(prefix + '-rate').textContent = '₦' + rate + '/$';
 }
 
 function handleImgUpload(input) {
@@ -1494,13 +1797,14 @@ function handleImgUpload(input) {
 }
 
 function goToStep2() {
-  const { type, name, sub, rate, imgSrc, imgSize } = sellCard;
-  setHero('denom-hero', type, name, sub, rate, imgSrc, imgSize);
+  const { type, name, country, rate, imgSrc, imgSize } = sellCard;
+  const countryNames = { usa: 'USA', uk: 'UK', canada: 'Canada', australia: 'Australia' };
+  setHero('denom-hero', type, name, countryNames[country], rate, imgSrc, imgSize);
   const denominations = [10, 25, 50, 100, 150, 200, 250, 500];
   const grid = document.getElementById('denom-grid');
   grid.innerHTML = '';
   denominations.forEach(d => {
-    const payout = Math.round(d * rate * 0.98);
+    const payout = Math.round(d * rate - 50);
     const chip = document.createElement('div');
     chip.className = 'denom-chip';
     chip.innerHTML = `<div class="denom-val">$${d}</div><div class="denom-payout">≈₦${payout.toLocaleString()}</div>`;
@@ -1535,11 +1839,11 @@ function onCustomAmount(val) {
 function updatePayout(amount) {
   const rate  = sellCard.rate;
   const gross = amount * rate;
-  const fee   = Math.round(gross * 0.02);
+  const fee   = 50;
   const net   = Math.round(gross - fee);
   document.getElementById('p-card-val').textContent = '$' + amount;
   document.getElementById('p-rate').textContent     = '₦' + rate + '/$';
-  document.getElementById('p-fee').textContent      = '−₦' + fee.toLocaleString();
+  document.getElementById('p-fee').textContent      = '−₦50';
   document.getElementById('p-total').textContent    = '₦' + net.toLocaleString();
   document.getElementById('payout-preview').style.display = 'block';
   document.getElementById('denom-next-btn').disabled = false;
@@ -1547,10 +1851,12 @@ function updatePayout(amount) {
 
 let txCount = 1001;
 function submitSell() {
-  const { type, name, sub, rate, imgSrc, imgSize } = sellCard;
+  const { type, name, country, rate, imgSrc, imgSize } = sellCard;
+  const countryNames = { usa: 'USA', uk: 'UK', canada: 'Canada', australia: 'Australia' };
+  const sub = countryNames[country];
   const amount = selectedDenom;
   const gross  = amount * rate;
-  const fee    = Math.round(gross * 0.02);
+  const fee    = 50;
   const net    = Math.round(gross - fee);
   const ref    = '#CS' + (txCount++).toString();
   const scIcon = document.getElementById('sc-icon');
@@ -1563,12 +1869,68 @@ function submitSell() {
   document.getElementById('sc-payout').textContent = '₦' + net.toLocaleString();
   document.getElementById('sc-val').textContent    = '$' + amount;
   document.getElementById('sc-rate').textContent   = '₦' + rate + '/$';
-  document.getElementById('sc-fee').textContent    = '−₦' + fee.toLocaleString();
+  document.getElementById('sc-fee').textContent    = '−₦50';
   navigate('sell-success');
   setTimeout(() => {
     const check = document.querySelector('.success-checkmark');
     if (check) { check.style.transition = 'stroke-dashoffset .5s ease'; check.style.strokeDashoffset = '0'; }
   }, 300);
+}
+
+// ── RATE CALCULATOR ──
+let calcCard = {};
+
+function openRateCalc(type, name) {
+  calcCard = { type, name, country: 'usa', cardType: 'physical', rate: CARD_RATES[type].usa, imgSrc: CARD_RATES[type].img, imgSize: CARD_RATES[type].size };
+  document.getElementById('calc-amount').value = '';
+  document.getElementById('calc-preview').style.display = 'none';
+  document.querySelectorAll('#calc-country-row .filter-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#calc-country-row [data-country="usa"]').classList.add('active');
+  document.querySelectorAll('#calc-type-row .filter-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('#calc-type-row .filter-chip:first-child').classList.add('active');
+  setHero('calc-hero', type, name, 'USA · Physical', CARD_RATES[type].usa, CARD_RATES[type].img, CARD_RATES[type].size);
+  navigate('rate-calc');
+}
+
+function selectCalcCountry(country, el) {
+  calcCard.country = country;
+  calcCard.rate = CARD_RATES[calcCard.type][country];
+  el.closest('.filter-row').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const countryNames = { usa: 'USA', uk: 'UK', canada: 'Canada', australia: 'Australia' };
+  const typeLabel = calcCard.cardType === 'physical' ? 'Physical' : 'E-code';
+  document.getElementById('calc-hero-sub').textContent = countryNames[country] + ' · ' + typeLabel;
+  document.getElementById('calc-hero-rate').textContent = '₦' + calcCard.rate + '/$';
+  const amount = parseFloat(document.getElementById('calc-amount').value) || 0;
+  if (amount > 0) calcPayout(amount);
+}
+
+function selectCalcType(type, el) {
+  calcCard.cardType = type;
+  el.closest('.filter-row').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const countryNames = { usa: 'USA', uk: 'UK', canada: 'Canada', australia: 'Australia' };
+  const typeLabel = type === 'physical' ? 'Physical' : 'E-code';
+  document.getElementById('calc-hero-sub').textContent = countryNames[calcCard.country] + ' · ' + typeLabel;
+  const amount = parseFloat(document.getElementById('calc-amount').value) || 0;
+  if (amount > 0) calcPayout(amount);
+}
+
+function calcPayout(amount) {
+  amount = parseFloat(amount) || 0;
+  if (amount <= 0) {
+    document.getElementById('calc-preview').style.display = 'none';
+    return;
+  }
+  const rate = calcCard.rate;
+  const gross = amount * rate;
+  const fee = 50;
+  const net = Math.round(gross - fee);
+  document.getElementById('calc-card-val').textContent = '$' + amount;
+  document.getElementById('calc-rate').textContent = '₦' + rate + '/$';
+  document.getElementById('calc-fee').textContent = '−₦50';
+  document.getElementById('calc-total').textContent = '₦' + net.toLocaleString();
+  document.getElementById('calc-preview').style.display = 'block';
 }
 
 // ── WITHDRAWAL ──
@@ -1603,7 +1965,7 @@ function setWdAmount(val) {
 }
 
 function updateWdSummary(amount) {
-  wdFee = Math.round(amount * 0.01);
+  wdFee = 50;
   wdNet = Math.round(amount - wdFee);
   const fmt = n => '₦' + n.toLocaleString();
   document.getElementById('wd-sum-amount').textContent = fmt(amount);
@@ -1672,7 +2034,7 @@ function submitWithdrawal() {
 const TRANSACTIONS = [
   {
     id: '#CS1842', type: 'card-sale', name: 'iTunes / Apple', sub: 'USA Physical · $50 card',
-    date: 'Feb 18, 2026 · 14:32', amount: '+₦37,500', credit: true, status: 'completed',
+    date: 'Feb 18, 2026 · 14:32', amount: '+₦37,450', credit: true, status: 'completed',
     heroColor: '#111', typeLabel: 'Card Sale',
     iconSvg: '<img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Apple-logo.png" style="width:26px;height:26px;object-fit:contain;">',
     details: [
@@ -1680,13 +2042,13 @@ const TRANSACTIONS = [
       { label:'Denomination', value:'$50 USD' },
       { label:'Rate Applied', value:'₦750/$' },
       { label:'Gross Amount', value:'₦37,500' },
-      { label:'Platform Fee', value:'−₦750' },
-      { label:'Net Payout',   value:'₦36,750' },
+      { label:'Platform Fee', value:'−₦50' },
+      { label:'Net Payout',   value:'₦37,450' },
     ]
   },
   {
     id: '#CS1831', type: 'card-sale', name: 'Amazon USA', sub: 'USA E-code · $25 card',
-    date: 'Feb 17, 2026 · 09:15', amount: '+₦17,000', credit: true, status: 'completed',
+    date: 'Feb 17, 2026 · 09:15', amount: '+₦16,950', credit: true, status: 'completed',
     heroColor: '#111', typeLabel: 'Card Sale',
     iconSvg: '<img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" style="width:32px;height:26px;object-fit:contain;">',
     details: [
@@ -1694,13 +2056,13 @@ const TRANSACTIONS = [
       { label:'Denomination', value:'$25 USD' },
       { label:'Rate Applied', value:'₦680/$' },
       { label:'Gross Amount', value:'₦17,000' },
-      { label:'Platform Fee', value:'−₦340' },
-      { label:'Net Payout',   value:'₦16,660' },
+      { label:'Platform Fee', value:'−₦50' },
+      { label:'Net Payout',   value:'₦16,950' },
     ]
   },
   {
     id: '#CS1820', type: 'card-sale', name: 'Google Play', sub: 'USA Physical · $100 card',
-    date: 'Feb 16, 2026 · 17:44', amount: '+₦62,000', credit: true, status: 'pending',
+    date: 'Feb 16, 2026 · 17:44', amount: '+₦61,950', credit: true, status: 'pending',
     heroColor: '#111', typeLabel: 'Card Sale',
     iconSvg: '<img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" style="width:36px;height:26px;object-fit:contain;">',
     details: [
@@ -1708,8 +2070,8 @@ const TRANSACTIONS = [
       { label:'Denomination', value:'$100 USD' },
       { label:'Rate Applied', value:'₦620/$' },
       { label:'Gross Amount', value:'₦62,000' },
-      { label:'Platform Fee', value:'−₦1,240' },
-      { label:'Est. Payout',  value:'₦60,760' },
+      { label:'Platform Fee', value:'−₦50' },
+      { label:'Est. Payout',  value:'₦61,950' },
     ]
   },
   {
@@ -1721,8 +2083,8 @@ const TRANSACTIONS = [
       { label:'Bank',         value:'GTBank' },
       { label:'Account',      value:'•••• •••• 4821' },
       { label:'Amount',       value:'₦50,000' },
-      { label:'Transfer Fee', value:'−₦500' },
-      { label:'Amount Sent',  value:'₦49,500' },
+      { label:'Transfer Fee', value:'−₦50' },
+      { label:'Amount Sent',  value:'₦49,950' },
     ]
   },
   {
@@ -2000,6 +2362,66 @@ function showSavedToast(msg) {
   }, 2200);
 }
 
+// Dark mode toggle
+function toggleDarkMode() {
+  const toggle = document.getElementById('dark-mode-toggle');
+  toggle.classList.toggle('off');
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+}
+
+// Bank menu dropdown
+function toggleBankMenu(e, idx) {
+  e.stopPropagation();
+  const menu = document.getElementById('bank-menu-' + idx);
+  // Close all other menus
+  document.querySelectorAll('.bank-menu-dropdown').forEach(m => {
+    if (m !== menu) m.style.display = 'none';
+  });
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function makeDefaultBank(idx) {
+  // In real app, update backend
+  showSavedToast('Bank set as default');
+  document.querySelectorAll('.bank-menu-dropdown').forEach(m => m.style.display = 'none');
+  // Refresh page to show updated default badge
+  setTimeout(() => navigate('settings-banks'), 500);
+}
+
+function deleteBank(idx) {
+  if (confirm('Are you sure you want to delete this bank account?')) {
+    showSavedToast('Bank account deleted');
+    document.querySelectorAll('.bank-menu-dropdown').forEach(m => m.style.display = 'none');
+  }
+}
+
+// Custom bank select
+let selectedBank = '';
+function toggleBankSelect() {
+  const dropdown = document.getElementById('bank-select-dropdown');
+  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+
+function selectBankOption(bank) {
+  selectedBank = bank;
+  const trigger = document.getElementById('bank-select-trigger');
+  const value = document.getElementById('bank-select-value');
+  value.textContent = bank;
+  trigger.classList.remove('placeholder');
+  document.getElementById('bank-select-dropdown').style.display = 'none';
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.bank-card-menu')) {
+    document.querySelectorAll('.bank-menu-dropdown').forEach(m => m.style.display = 'none');
+  }
+  if (!e.target.closest('.custom-select')) {
+    document.querySelectorAll('.custom-select-dropdown').forEach(d => d.style.display = 'none');
+  }
+});
+
 // Add bank sheet toggle
 function showAddBankSheet() {
   const s = document.getElementById('add-bank-sheet');
@@ -2120,14 +2542,100 @@ function resetPinFlow() {
   document.getElementById('pin-success').style.display = 'none';
 }
 
+// Balance toggle
+let balanceHidden = true;
+function toggleBalance() {
+  balanceHidden = !balanceHidden;
+  const valueEl = document.getElementById('balance-value');
+  const eyeOpen = document.getElementById('eye-open');
+  const eyeCircle = document.getElementById('eye-circle');
+  const eyeSlash = document.getElementById('eye-slash');
+  
+  if (balanceHidden) {
+    valueEl.textContent = '••••••••';
+    eyeOpen.style.display = 'none';
+    eyeCircle.style.display = 'none';
+    eyeSlash.style.display = 'block';
+  } else {
+    valueEl.textContent = '247,500';
+    eyeOpen.style.display = 'block';
+    eyeCircle.style.display = 'block';
+    eyeSlash.style.display = 'none';
+  }
+}
+
+// ── ONBOARDING ──
+let currentSlide = 0;
+function nextSlide() {
+  const slides = document.querySelectorAll('.onboard-slide');
+  const dots = document.querySelectorAll('.onboard-dot');
+  if (currentSlide < 2) {
+    slides[currentSlide].classList.remove('active');
+    dots[currentSlide].classList.remove('active');
+    currentSlide++;
+    slides[currentSlide].classList.add('active');
+    dots[currentSlide].classList.add('active');
+    if (currentSlide === 2) {
+      document.getElementById('onboard-next').textContent = 'Get Started';
+      document.getElementById('onboard-next').onclick = () => { localStorage.setItem('hasSeenOnboarding', 'true'); navigate('login'); };
+    }
+  }
+}
+
+function doLogin() {
+  localStorage.setItem('isLoggedIn', 'true');
+  navigate('home');
+}
+
+function doSignup() {
+  const email = document.getElementById('signup-email').value;
+  if (!email) { alert('Please enter email address'); return; }
+  document.getElementById('otp-email').textContent = email;
+  navigate('otp');
+  setTimeout(() => document.getElementById('otp1').focus(), 100);
+}
+
+function otpMove(current, prev, next) {
+  if (current.value.length === 1 && next) document.getElementById(next).focus();
+  if (current.value.length === 1 && !next) setTimeout(verifyOTP, 300);
+}
+
+function otpBack(e, current, prev) {
+  if (e.key === 'Backspace' && !current.value && prev) document.getElementById(prev).focus();
+}
+
+function verifyOTP() {
+  const otp = ['otp1','otp2','otp3','otp4'].map(id => document.getElementById(id).value).join('');
+  if (otp.length !== 4) { alert('Please enter complete OTP'); return; }
+  localStorage.setItem('isLoggedIn', 'true');
+  navigate('home');
+  showSavedToast('Account verified successfully!');
+}
+
+function resendOTP() {
+  showSavedToast('OTP resent to your email');
+}
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', function() {
   const _spin = document.createElement('style');
   _spin.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
   document.head.appendChild(_spin);
+  
+  const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding') === 'true';
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  
+  if (isLoggedIn) {
+    navigate('home');
+  } else if (hasSeenOnboarding) {
+    navigate('login');
+  } else {
+    navigate('onboard');
+  }
+  
   tick(); 
   setInterval(tick, 1000);
-  document.querySelectorAll('.filter-row').forEach(row => {
+  document.querySelectorAll('.filter-row:not(#country-filter-row)').forEach(row => {
     row.querySelectorAll('.filter-chip').forEach(chip => {
       chip.onclick = () => {
         row.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
@@ -2136,6 +2644,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   renderTxList();
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+    const toggle = document.getElementById('dark-mode-toggle');
+    if (toggle) toggle.classList.remove('off');
+  }
+  toggleBalance();
+  toggleBalance();
 });
 
 </script>
